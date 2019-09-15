@@ -47,8 +47,10 @@ initial_checks() {
   local result=0
 
   bin_check mktemp    || result=1
-  bin_check seq       || result=1
   bin_check curl      || result=1
+  bin_check grep      || return=1
+  bin_check sed       || return=1
+  bin_check head      || return=1
   bin_check tar       || result=1
   bin_check sha256sum || result=1
   bin_check gcc       || result=1
