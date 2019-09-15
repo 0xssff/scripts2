@@ -1,5 +1,6 @@
 #!/bin/sh
 
+PAGE='https://www.mirbsd.org/jupp.htm'
 BASE_URL='http://www.mirbsd.org/MirOS/dist/jupp/'
 VRSN_STR='joe-3.1jupp'
 EXT='.tgz'
@@ -12,7 +13,7 @@ PREFIX_DIR='/usr/local'
 SYSCONF_DIR='/etc'
 CONF_ARGS="--prefix=$PREFIX_DIR --sysconfdir=$SYSCONF_DIR --disable-dependency-tracking --disable-termidx" # --disable-getpwnam 
 
-latest_url() {
+latest_version() {
   local vrsns latest_vrsn
 
   vrsns=$(curl -fL "$BASE_URL" --silent | grep -E 'joe-3\.1jupp[0-9]+.tgz</A>$' | sed -e 's|^<LI><A HREF=".*">||g' -e 's|</A>$||g' | sed -e "s|^$VRSN_STR||g" -e "s|$EXT$||g")
@@ -22,7 +23,11 @@ latest_url() {
     [ $num -gt $latest_vrsn ] && latest_vrsn=$num
   done
 
-  printf "$BASE_URL$VRSN_STR$latest_vrsn$EXT\n"
+  printf "$VRSN_STR$latest_vrsn$EXT\n"
+}
+
+latest_sha256() {
+  curl -fL "$PAGE" --silent | grep "SHA256 ($1)" | sed -e 's|^.*= ||' -e 's|</li>$||'
 }
 
 bin_check() {
@@ -52,22 +57,25 @@ initial_checks() {
 }
 
 download() {
-  local url shasum
+  local file_str url shasum latest_shasum
 
   # Find latest version
-  url=$(latest_url)
+  file_str=$(latest_version)
+  url="$BASE_URL$file_str"
 
   # Download latest .tar.gz
   printf "Downloading from $url\n"
   curl -fLo "$DOWNLOAD_FILE" "$url" --silent
 
-  # Check download against checksum
+  # Check download against latest version checksum
+  latest_shasum=$(latest_sha256 "$file_str")
   shasum=$(sha256sum "$DOWNLOAD_FILE" | cut -d' ' -f1)
+
   if [ "$shasum" != "$SHA256SUM" ]; then
     printf 'downloaded .tar.gz failed sha256 checksum!\n'
     return 1
   else
-    printf 'successfully downloaded jupp.tar.gz\n'
+    printf 'successfully downloaded and verified jupp.tar.gz\n'
     return 0
   fi
 }
