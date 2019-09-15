@@ -4,7 +4,6 @@ PAGE='https://www.mirbsd.org/jupp.htm'
 BASE_URL='http://www.mirbsd.org/MirOS/dist/jupp/'
 VRSN_STR='joe-3.1jupp'
 EXT='.tgz'
-SHA256SUM='c5cbe3f97683f6e513f611a60531feefb9b877f8cea4c6e9087b48631f69ed40'
 DOWNLOAD_FILE='jupp.tar.gz'
 TAR_DIR='jupp'
 
@@ -73,7 +72,7 @@ download() {
   latest_shasum=$(latest_sha256 "$file_str")
   shasum=$(sha256sum "$DOWNLOAD_FILE" | cut -d' ' -f1)
 
-  if [ "$shasum" != "$SHA256SUM" ]; then
+  if [ "$shasum" != "$latest_shasum" ]; then
     printf 'downloaded .tar.gz failed sha256 checksum!\n'
     return 1
   else
