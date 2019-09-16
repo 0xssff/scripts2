@@ -12,6 +12,10 @@ PREFIX_DIR='/usr/local'
 SYSCONF_DIR='/etc'
 CONF_ARGS="--prefix=$PREFIX_DIR --sysconfdir=$SYSCONF_DIR --disable-dependency-tracking --disable-termidx" # --disable-getpwnam 
 
+silent() {
+  $@ > /dev/null 2>&1
+}
+
 latest_version() {
   local vrsns latest_vrsn
 
@@ -30,11 +34,7 @@ latest_sha256() {
 }
 
 bin_check() {
-  silent() {
-    $@ > /dev/null 2>&1
-  }
-
-  if ( ! silent $1 --version ) && ( ! silent $1 -v ) && ( ! silent $1 --help ) && ( ! silent $1 -h ); then
+  if ( ! silent $1 --version ) && ( ! silent $1 -v ) && ( ! silent $1 --help ) && ( ! silent $1 -h ) && ( ! silent which $1 ); then
     printf "$1 not found!\n"
     return 1
   else
