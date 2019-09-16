@@ -16,6 +16,15 @@ silent() {
   $@ > /dev/null 2>&1
 }
 
+checksum_cmd() {
+  local cmd
+
+  bin_check sha256sum --silent && sha256sum "$@"    && return 0
+  bin_check cksum --silent     && cksum sha256 "$@" && return 0
+
+  return 1
+}
+
 latest_version() {
   local vrsns latest_vrsn
 
@@ -35,7 +44,7 @@ latest_sha256() {
 
 bin_check() {
   if ( ! silent $1 --version ) && ( ! silent $1 -v ) && ( ! silent $1 --help ) && ( ! silent $1 -h ) && ( ! silent which $1 ); then
-    printf "$1 not found!\n"
+    [ "$2" = '--silent' ] || printf "$1 not found!\n"
     return 1
   else
     return 0
@@ -47,11 +56,11 @@ initial_checks() {
 
   bin_check mktemp    || result=1
   bin_check curl      || result=1
-  bin_check grep      || return=1
-  bin_check sed       || return=1
-  bin_check head      || return=1
+  bin_check grep      || result=1
+  bin_check sed       || result=1
+  bin_check head      || result=1
   bin_check tar       || result=1
-  bin_check sha256sum || result=1
+  bin_check sha256sum || bin_check cksum || result=1
   bin_check gcc       || result=1
 
   return $result
@@ -70,7 +79,8 @@ download() {
 
   # Check download against latest version checksum
   latest_shasum=$(latest_sha256 "$file_str")
-  shasum=$(sha256sum "$DOWNLOAD_FILE" | cut -d' ' -f1)
+  shasum=$(checksum_cmd "$DOWNLOAD_FILE") || return 1
+  shasum=$(printf "$shasum" | head -c 64)
 
   if [ "$shasum" != "$latest_shasum" ]; then
     printf 'downloaded .tar.gz failed sha256 checksum!\n'
@@ -113,7 +123,7 @@ main() {
   download || return 1
 
   # Compile jupp
-  compile || return 1
+  compile || printf 'Failed to compile / install!\n'
 
   # Cleanup
   cd "$orig_dir"
