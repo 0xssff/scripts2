@@ -1,0 +1,11 @@
+#!/bin/sh
+
+urxvt_launch()
+{
+  if ( ! urxvtc "$@" ); then
+    urxvtd -q -o -f
+    urxvtc "$@"
+  fi
+}
+
+urxvt_launch "$@"

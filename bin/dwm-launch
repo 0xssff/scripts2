@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Set touchpad preferences
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Tapping Enabled' 1
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Natural Scrolling Enabled' 1
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'libinput Disable While Typing Enabled' 0
+
+# Keyboard preferences
+setxkbmap gb
+xset r rate 225 35
+
+# Set wallpaper
+feh --bg-fill '/usr/share/backgrounds/xfce/xfce-stripes.png'
+
+# Launch dbus session
+[ -z "$DBUS_SESSION_BUS_ADDRESS" ] || eval "$(dbus-launch --sh-syntax --exit-with-session)"
+
+# Launch pulseaudio daemon
+pulseaudio --check || pulseaudio --daemon
+
+# Launch dwm with slstatus bar
+slstatus &
+dwm
