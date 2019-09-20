@@ -1,0 +1,12 @@
+[Unit]
+Description=System Performance
+After=multi-user.target suspend.target
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/usr/local/bin/set-performance
+TimeoutSec=0
+
+[Install]
+WantedBy=multi-user.target suspend.target
