@@ -1,6 +1,6 @@
 [Unit]
 Description=Lock the screeen
-After=multi-user.target suspend.target
+Before=sleep.target
 
 [Service]
 User=%I
@@ -8,4 +8,4 @@ Environment=DISPLAY=:0
 ExecStart=/usr/bin/xsecurelock
 
 [Install]
-WantedBy=suspend.target
+WantedBy=sleep.target

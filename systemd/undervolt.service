@@ -1,0 +1,12 @@
+[Unit]
+Description=Undervolt
+After=multi-user.target suspend.target
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/usr/bin/python -m undervolt --core -100 --uncore -100 --cache -100 --gpu -100
+TimeoutSec=0
+
+[Install]
+WantedBy=multi-user.target suspend.target
