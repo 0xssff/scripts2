@@ -1,0 +1,37 @@
+#!/bin/sh
+
+usage()
+{
+  echo 'Usage: term-ssh <USER> <IP>'
+}
+
+log_file()
+{
+  TMPFILE="/tmp/term_ssh_$(date +%d_%m_%H%M%S)"
+}
+
+urxvt_launch()
+{
+  if ( ! urxvtc "$@" ); then
+    urxvtd -q -o -f
+    urxvtc "$@"
+  fi
+}
+
+xterm_launch()
+{
+  xterm -fg 'white' -bg 'black' -fa 'DejaVu Sans Mono:style=Regular:size=11:antialias=true' "$@"
+}
+
+term_ssh()
+{
+  ( urxvt_launch -e ssh $1@$2 & ) > "$TMPFILE" 2>&1
+}
+
+if [ "$#" != "2" ]; then
+  usage
+  exit 0
+fi
+
+log_file
+term_ssh "$1" "$2"

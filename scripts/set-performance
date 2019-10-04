@@ -1,0 +1,23 @@
+#!/bin/bash
+
+function check_module()
+{
+	if ! (lsmod | grep -q -e '^msr') ; then
+		sudo modprobe msr
+	fi
+}
+
+function set_perf()
+{
+	sudo x86_energy_perf_policy --cpu $1 $2
+}
+
+check_module
+set_perf 0 performance
+set_perf 1 performance
+set_perf 2 performance
+set_perf 3 performance
+set_perf 4 performance
+set_perf 5 performance
+set_perf 6 performance
+set_perf 7 performance

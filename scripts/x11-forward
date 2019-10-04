@@ -1,0 +1,24 @@
+#!/bin/sh
+
+usage()
+{
+  echo 'Usage: x11-forward <USER> <IP> <X11 APPLICATION>'
+}
+
+log_file()
+{
+  TMPFILE="/tmp/x11_forward_$1_$(date +%d_%m_%H%M%S)"
+}
+
+forward()
+{
+  (ssh -X "$1"@"$2" "$3" &) > "$TMPFILE" 2>&1
+}
+
+if [ "$#" != "3" ]; then
+  usage
+  exit 0
+fi
+
+log_file "$3"
+forward "$1" "$2" "$3"
