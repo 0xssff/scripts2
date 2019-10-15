@@ -1,0 +1,3 @@
+#!/bin/sh
+
+shred -n 20 -s 150M /dev/sda

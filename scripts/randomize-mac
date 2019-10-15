@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ "$#" != 1 ] || ( ! ip link | grep -q -E "^[0-9]+: $1"); then
+  echo 'No valid interface provided!'
+  exit 1
+fi
+
+sudo systemctl stop NetworkManager
+sudo ip link set $1 down
+sudo systemctl restart macspoof@$1
+sudo ip link set $1 up
+sudo systemctl start NetworkManager
