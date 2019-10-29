@@ -89,7 +89,7 @@ main() {
     return 1
   fi
 
-  filename=$(ls "$USER_SCRIPTS_DIR" | grep -e "^$1" | grep -v -E "\.$COMPILED_EXT$")
+  filename=$(ls "$USER_SCRIPTS_DIR" | grep -e "^$1" | grep -v -E "\.$COMPILED_EXT$" | head -n 1)
   [ "$filename" = '' ] && printf "no scripts with name '$1' found\n" && return 1
   [ "$filename" = *' '* ] && printf "multiple scripts with name $1, or name contains spaces! neither supported\n" && return 1
 
