@@ -81,7 +81,7 @@ handle_filename() {
 
   path="$USER_SCRIPTS_DIR/$name"
   if [ "$file_ext" = 'c' ]; then
-    path="$path.$COMPILED_EXT.$file_ext"
+    path="$path.$COMPILED_EXT"
     [ $REFRESH -eq 1 ] && rm "$path"
     [ ! -f "$path" ] && ! c_compile "$1" "$path" && return 1
   elif [ "$file_ext" = 'py' ]; then
@@ -93,7 +93,7 @@ handle_filename() {
     name=$(check_shebang "$1" 'sh')
     path="$name $path"
   elif [ "$file_ext" = 'go' ]; then
-    path="$path.$COMPILED_EXT.$file_ext"
+    path="$path.$COMPILED_EXT"
     [ $REFRESH -eq 1 ] && rm "$path"
     [ ! -f "$path" ] && ! go_compile "$name" "$1" "$path" && return 1
   else
@@ -126,7 +126,7 @@ main() {
     shift 1
   fi
 
-  filename=$(ls "$USER_SCRIPTS_DIR" | grep -e "^$1" | grep -v -E "\.$COMPILED_EXT$" | head -n 1)
+  filename=$(ls "$USER_SCRIPTS_DIR" | grep -e "^$1" | grep -v -E "\.$COMPILED_EXT$")
   [ "$filename" = '' ] && printf "no scripts with name '$1' found\n" && return 1
   [ "$filename" = *' '* ] && printf "multiple scripts with name $1, or name contains spaces! neither supported\n" && return 1
 
