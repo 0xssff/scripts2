@@ -113,6 +113,7 @@ char **name_ext_split(char *string)
 	printf("setting initial string\n");
 	sz = strlen(string);
 	name = (char *) malloc(sz);
+	split = (char *) malloc(FILE_EXT_MAX);
 	memset(name, 0, sz);
 
 	/* if file begins with '.', this'll be stripped so check and set */
