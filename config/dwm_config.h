@@ -5,6 +5,8 @@
 #define KEY_BRIGHT_DOWN 0x1008ff03
 #define KEY_VOL_UP      0x1008ff13
 #define KEY_VOL_DOWN    0x1008ff11
+#define KEY_VOL_MUTE    0x1008ff12
+#define KEY_MIC_MUTE    0x1008ffb2
 #define BCKLGHT_DIFF	"5"
 #define VOLUP_DIFF	"5%+"
 #define VOLDOWN_DIFF	"5%-"
@@ -85,6 +87,8 @@ static const char *brightness_up[]  =   { "xbacklight", "-inc", BCKLGHT_DIFF };
 static const char *brightness_down[]  = { "xbacklight", "-dec", BCKLGHT_DIFF };
 static const char *volume_up[] = { "amixer", "-D", "pulse", "sset", "Master", VOLUP_DIFF, NULL };
 static const char *volume_down[] = { "amixer", "-D", "pulse", "sset", "Master", VOLDOWN_DIFF, NULL };
+static const char *volume_mute[] = { "amixer", "-D", "pulse", "sset", "Master", "1+", "toggle" };
+static const char *mic_mute[] = { "amixer", "-D", "pulse", "sset", "Capture", "1+", "toggle" };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -128,6 +132,8 @@ static Key keys[] = {
     { 0,                            KEY_BRIGHT_DOWN,           spawn,       {.v = brightness_down } },
     { 0,                            KEY_VOL_UP,                spawn,       {.v = volume_up } },
     { 0,                            KEY_VOL_DOWN,              spawn,       {.v = volume_down} },
+    { 0,                            KEY_VOL_MUTE,              spawn,       {.v = volume_mute} },
+    { 0,                            KEY_MIC_MUTE,              spawn,       {.v = mic_mute} },
 };
 
 /* button definitions */
