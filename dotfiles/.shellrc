@@ -1,0 +1,19 @@
+# Variables
+SHELLRC_SET=1
+
+# $HOME/.user/bin
+export PATH="$HOME/.user/bin:$PATH"
+
+# pyenv
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+( printf "$0" | grep -q -E 'bash$' ) && eval "$(pyenv virtualenv-init -)"
+
+# rbenv
+export PATH="$HOME/.rbenv/bin:$PATH"
+eval "$(rbenv init -)"
+
+# g
+export GOPATH="$HOME/go"
+export GOROOT="$HOME/.go"
+export PATH="$GOPATH/bin:$PATH"
