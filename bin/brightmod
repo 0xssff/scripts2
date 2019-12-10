@@ -1,0 +1,55 @@
+#!/bin/bash
+
+BRIGHTDIR='/sys/class/backlight/intel_backlight'
+BRIGHTFILE="$BRIGHTDIR/brightness"
+MAX_BRIGHT=$(cat "$BRIGHTDIR/max_brightness")
+
+function write_brightness()
+{
+	sudo sh -c "echo '$1' > '$BRIGHTFILE'"
+}
+
+function inc_brightness()
+{
+	local cur new
+
+	cur=$(cat "$BRIGHTFILE")
+	let new=$cur+$1
+	if [[ $new -lt $MAX_BRIGHT ]] ; then
+		write_brightness "$new"
+	else
+		write_brightness "$MAX_BRIGHT"
+	fi
+}
+
+function dec_brightness()
+{
+	local cur new
+
+	cur=$(cat "$BRIGHTFILE")
+	let new=$cur-$1
+	if [[ $new -gt 0 ]] ; then
+		write_brightness "$new"
+	else
+		write_brightness "0"
+	fi
+}
+
+case "$1" in
+	'set')
+		write_brightness "$2"
+		exit 0
+		;;
+	'show')
+		cat "$BRIGHTFILE"
+		exit 0
+		;;
+	'up')
+		inc_brightness 25
+		exit 0
+		;;
+	'down')
+		dec_brightness 25
+		exit 0
+		;;
+esac
