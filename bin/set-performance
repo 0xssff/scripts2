@@ -2,18 +2,20 @@
 
 function check_module()
 {
-	if ! (lsmod | grep -q -e '^msr') ; then
-		sudo modprobe msr
-	fi
+    if ! (lsmod | grep -q -e '^msr') ; then
+        sudo modprobe msr
+    fi
 }
 
 function set_perf()
 {
-	sudo x86_energy_perf_policy --cpu $1 $2
+    sudo x86_energy_perf_policy --cpu $1 $2
 }
 
 check_module
-set_perf 0 performance
-#set_perf 1 performance
-set_perf 2 performance
-#set_perf 3 performance
+
+for cpu in $(ls /dev/cpu); do
+    if [ -c "/dev/cpu/$cpu/msr" ]; then
+        set_perf $cpu performance
+    fi
+done
