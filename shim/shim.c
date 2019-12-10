@@ -9,6 +9,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <errno.h>
+#include <regex.h>
 
 #define USER_SUBDIR			"/.user"
 #define SCRIPT_SUBDIR			USER_SUBDIR "/scripts"
@@ -83,91 +84,92 @@ void check_dirs(void)
 	}
 }
 
-void append_string(char *dest, char *src, int num)
-{
-	size_t dest_sz, src_sz;
-	int di, si;
+int shim_exec(char *command) {
+	char *executable;
 
-	dest_sz = strlen(dest);
-	src_sz = strlen(src);
-	if (num >= src_sz) num = src_sz - 1;
+	/* Break up command into array of arguments */
+}
 
-	while (di < dest_sz && si < num) {
-		if (dest[di] == 0) {
-			dest[di] = src[si];
-			si++;
+bool has_file_ext(char *filestr, char *ext) {
+	size_t sz;
+	int reti;
+	regex_t regex;
+	char *regex_str;
+
+	sz = strlen(ext) + 3;
+	regex_str = (char *) malloc(sz);
+	strncat(regex_str, "\\.", sz);
+	strncat(regex_str, ext, sz);
+	strncat(regex_str, "$", sz);
+
+	reti = regcomp(&regex, regex_str, 0);
+	if (reti) exit_print(1, "failed to compile regex!\n");
+
+	reti = regexec(&regex, filestr, 0, NULL, 0);
+	return reti ? false : true;
+}
+
+char *remove_file_ext(char *filestr, char *ext) {
+	size_t sz;
+	char *ret_str;
+
+	if (has_file_ext(filestr, ext)) {
+		printf("%s\n", filestr);
+		sz = strlen(filestr) - strlen(ext) - 1;
+		ret_str = (char *) malloc(sz);
+		for (int i = 0; i < sz; i++) {
+			ret_str[i] = filestr[i];
 		}
 
-		di++;
-	}
-}
-
-char **name_ext_split(char *string)
-{
-	size_t sz;
-	char *name, *split, *delim = ".", *file_array[3];
-
-	printf("name_ext_split()\n");
-
-	/* setup name string */
-	printf("setting initial string\n");
-	sz = strlen(string);
-	name = (char *) malloc(sz);
-	split = (char *) malloc(FILE_EXT_MAX);
-	memset(name, 0, sz);
-
-	/* if file begins with '.', this'll be stripped so check and set */
-	printf("if file begins with '.', this'll be stripped so check and set\n");
-	if (strncmp(string, ".", 1) == 0)
-		append_string(name, ".", 1);
-
-	/* final split is the file extension */
-	split = strtok(string, delim);
-	while (split != NULL) {
-		printf("split: %s\n", split);
-		append_string(name, split, strlen(split));
-		split = strtok(NULL, delim);
+		printf("remove_file_ext: %s\n", ret_str);
 	}
 
-	/* final split is the file extension */
-	printf("making the file array\n");
-	printf("name = %s\n", name);
-	file_array[0] = name;
-	printf("extension = %s\n", split);
-	file_array[1] = split;
-	printf("name + extension = %s\n", string);
-	file_array[2] = string;
-
-	/* cleanup */
-	printf("cleaning up...\n");
-	free(name);
-
-	return file_array;
+	return ret_str;
 }
 
-
-
-char *ext_c(char **file_array)
-{
+char *ext_compiled(char *filestr) {
 	size_t sz;
-	char *compile_path, **exec_array;
 
-	sz = strlen(DEFAULT_CC) + strlen(" ") + strlen(SCRIPT_DIR) + strlen("/") + strlen(file_array[3]) + strlen(" -o ") + strlen(file_array[1]) + strlen(".") + strlen(COMPILED_EXTENSION) + 1;
-	compile_path = (char *) malloc(sz);
-	snprintf(compile_path, sz, "%s %s/%s -o %s.%s", DEFAULT_CC, SCRIPT_DIR, file_array[3], file_array[1], COMPILED_EXTENSION);
-	printf("compile_path = %s\n", compile_path);
+	printf("compile_path = \n");
 
 	return "";
 }
 
-char *ext_py(char **file_array)
-{
+char *ext_c(char *filestr, char *filename) {
+	size_t sz;
+	char *command, **exec_array;
+
+	sz = strlen(DEFAULT_CC) + 1 + strlen(SCRIPT_DIR) + 1 + strlen(filestr) + 4 + strlen(filename) + 1 + strlen(COMPILED_EXTENSION) + 1;
+	command = (char *) malloc(sz);
+	snprintf(command, sz, "%s %s/%s -o %s.%s", DEFAULT_CC, SCRIPT_DIR, filestr, filename, COMPILED_EXTENSION);
+
+	printf("command = %s\n", command);
+	shim_exec(command);
+
+	return "";
+}
+
+char *ext_py(char *filestr) {
 	size_t sz;
 	char *exec_path;
 
-	sz = strlen(PYTHON_BIN) + strlen(" ") + strlen(SCRIPT_DIR) + strlen("/") + strlen(file_array[3]) + 1;
+	sz = strlen(PYTHON_BIN) + strlen(" ") + strlen(SCRIPT_DIR) + strlen("/") + strlen(filestr) + 1;
 	exec_path = (char *) malloc(sz);
-	snprintf(exec_path, sz, "%s %s/%s", PYTHON_BIN, SCRIPT_DIR, file_array[3]);
+	snprintf(exec_path, sz, "%s %s/%s", PYTHON_BIN, SCRIPT_DIR, filestr);
+	printf("exec_path = %s\n", exec_path);
+
+	return "";
+}
+
+char *ext_sh(char *filestr) {
+	size_t sz;
+	char *exec_path, sh_bin;
+
+	sh_bin = SH_BIN;
+
+	sz = strlen(sh_bin) + strlen(" ") + strlen(SCRIPT_DIR) + strlen("/") + strlen(filestr) + 1;
+	exec_path = (char *) malloc(sz);
+	snprintf(exec_path, sz, "%s %s/%s", sh_bin, SCRIPT_DIR, filestr);
 	printf("exec_path = %s\n", exec_path);
 
 	return "";
@@ -179,7 +181,7 @@ char *handle_file(char *arg)
 	bool found = false;
 	DIR *directory;
 	struct dirent *entry;
-	char *exec_path, **file_array; // 0: name, 1: extension, 2: name and extension
+	char *exec_path, *file_name; // 0: name, 1: extension, 2: name and extension
 
 	if ((directory = opendir(SCRIPT_DIR)) == NULL) {
 		exit_print(1, "Unable to open scripts directory \'%s\'\n", SCRIPT_DIR);
@@ -202,31 +204,33 @@ char *handle_file(char *arg)
 		if (entry_len < arg_len || strncmp(entry->d_name, arg, arg_len) != 0)
 			continue;
 
-		/* strip file extension */
-		printf("stripping file extension...\n");
-		file_array = name_ext_split(entry->d_name);
-		printf("file_array --> 0:%s 1:%s 2:%s\n", file_array[0], file_array[1], file_array[2]);
+		printf("entry->d_name: %s\n", entry->d_name);
 
 		/* check if this is the file! */
-		printf("checking if right file...\n");
-		if (strncmp(file_array[0], arg, arg_len)) {
-			printf("we found the right file!\n");
+		if ((file_name = remove_file_ext(entry->d_name, COMPILED_EXTENSION)) != NULL) {
 			found = true;
+			exec_path = ext_compiled(entry->d_name);
+			break;
+		} else if ((file_name = remove_file_ext(entry->d_name, "c")) != NULL) {
+			found = true;
+			exec_path = ext_c(entry->d_name, file_name);
+			printf("exec_path: %s\n", exec_path);
+			break;
+		} else if ((file_name = remove_file_ext(entry->d_name, "py")) != NULL) {
+			found = true;
+			exec_path = ext_py(entry->d_name);
+			printf("exec_path: %s\n", exec_path);
+			break;
+		} else if ((file_name = remove_file_ext(entry->d_name, "sh")) != NULL) {
+			found = true;
+			exec_path = ext_sh(entry->d_name);
+			printf("exec_path: %s\n", exec_path);
 			break;
 		}
 	}
 
-	if (!found) exit_print(1, "Script \'%s\' not found!\n", arg);
-
-	/* deal with file extension */
-	printf("dealing with extension...\n");
-	if (strncmp(file_array[1], "c", 1) == 0) {
-		exec_path = ext_c(file_array);
-	} else if (strncmp(file_array[1], "py", 2) == 0) {
-		exec_path = ext_py(file_array);
-	} else {
-		exit_print(1, "File extension \'%s\' not supported\n", file_array[1]);
-	}
+	/* script not found, exiting */
+	if (!found) exit_print(1, "script \'%s\' not found!\n", arg);
 
 	/* return exec_path! */
 	return exec_path;
@@ -242,6 +246,8 @@ int main(int argc, char **argv)
 
 	/* check USER AND SCRIPT directories exist */
 	check_dirs();
+
+	if (argc == 1) exit_print(1, "no arguments supplied!\n");
 
 	/* find file, handle file (compile / append program path / etc) and return executable path */
 	exec_path = handle_file(argv[1]);
