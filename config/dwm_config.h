@@ -105,9 +105,6 @@ static Key keys[] = {
 	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
 	{ MODKEY,                       XK_Return, zoom,           {0} },
-	{ MODKEY|ShiftMask,     XK_s,      spawn,      SHCMD("transset-df -a --dec .1") },
-	{ MODKEY|ShiftMask,     XK_d,      spawn,      SHCMD("transset-df -a --inc .1") },
-	{ MODKEY|ShiftMask,     XK_f,      spawn,      SHCMD("transset-df -a .75") },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
 	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
@@ -157,4 +154,3 @@ static Button buttons[] = {
 	{ ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
 	{ ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
 };
-
