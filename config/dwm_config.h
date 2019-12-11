@@ -1,15 +1,16 @@
 /* See LICENSE file for copyright and license details. */
 
 /* Modifer keys */
-#define KEY_BRIGHT_UP   0x1008ff02
-#define KEY_BRIGHT_DOWN 0x1008ff03
-#define KEY_VOL_UP      0x1008ff13
-#define KEY_VOL_DOWN    0x1008ff11
-#define KEY_VOL_MUTE    0x1008ff12
-#define KEY_MIC_MUTE    0x1008ffb2
-#define BCKLGHT_DIFF	"5"
-#define VOLUP_DIFF	"5%+"
-#define VOLDOWN_DIFF	"5%-"
+#define KEY_BRIGHT_UP     0x1008ff02
+#define KEY_BRIGHT_DOWN   0x1008ff03
+#define KEY_VOL_UP        0x1008ff13
+#define KEY_VOL_DOWN      0x1008ff11
+#define KEY_VOL_MUTE      0x1008ff12
+#define KEY_MIC_MUTE      0x1008ffb2
+#define KEY_PRINTSCRN     0xff61
+#define BCKLGHT_DIFF	  "5"
+#define VOLUP_DIFF        "5%+"
+#define VOLDOWN_DIFF      "5%-"
 
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
@@ -17,8 +18,8 @@ static const unsigned int snap      = 10;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const double defaultopacity  = 1.0;
-static const char *fonts[]          = { "Ubuntu Mono:size=9" };
-static const char dmenufont[]       = "Ubuntu Mono:size=9";
+static const char *fonts[]          = { "Ubuntu Mono:size=10" };
+static const char dmenufont[]       = "Ubuntu Mono:size=10";
 
 static const char col_base00[]      = "#1d1f21"; /* darkest-grey */
 static const char col_base08[]      = "#f92672"; /* vibrant pink */
@@ -87,8 +88,10 @@ static const char *brightness_up[]  =   { "xbacklight", "-inc", BCKLGHT_DIFF };
 static const char *brightness_down[]  = { "xbacklight", "-dec", BCKLGHT_DIFF };
 static const char *volume_up[] = { "amixer", "-D", "pulse", "sset", "Master", VOLUP_DIFF, NULL };
 static const char *volume_down[] = { "amixer", "-D", "pulse", "sset", "Master", VOLDOWN_DIFF, NULL };
-static const char *volume_mute[] = { "amixer", "-D", "pulse", "sset", "Master", "1+", "toggle" };
-static const char *mic_mute[] = { "amixer", "-D", "pulse", "sset", "Capture", "1+", "toggle" };
+static const char *volume_mute[] = { "amixer", "-D", "pulse", "sset", "Master", "1+", "toggle", NULL };
+static const char *mic_mute[] = { "amixer", "-D", "pulse", "sset", "Capture", "1+", "toggle", NULL };
+static const char *screenshot[] = { "scrotshot", NULL };
+static const char *screenshot_focused[] = { "scrotshot", "--focused", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -134,6 +137,8 @@ static Key keys[] = {
     { 0,                            KEY_VOL_DOWN,              spawn,       {.v = volume_down} },
     { 0,                            KEY_VOL_MUTE,              spawn,       {.v = volume_mute} },
     { 0,                            KEY_MIC_MUTE,              spawn,       {.v = mic_mute} },
+    { 0,                            KEY_PRINTSCRN,             spawn,       {.v = screenshot} },
+    { ShiftMask,                    KEY_PRINTSCRN,             spawn,       {.v = screenshot_focused} },
 };
 
 /* button definitions */
