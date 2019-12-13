@@ -21,7 +21,7 @@ initial_checks() {
   local result=0
 
   bin_check mktemp    || result=1
-  bin_check git       || reuslt=1
+  bin_check git       || result=1
   bin_check ninja     || result=1
   bin_check meson     || result=1
   bin_check gcc       || result=1

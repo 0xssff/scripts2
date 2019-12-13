@@ -23,7 +23,7 @@ initial_checks() {
 
   bin_check mktemp    || result=1
   bin_check curl      || result=1
-  bin_check git       || reuslt=1
+  bin_check git       || result=1
   bin_check make      || result=1
   bin_check gcc       || result=1
 
