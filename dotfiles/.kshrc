@@ -1,25 +1,13 @@
-# Other variables
-export EDITOR=jupp
-
 # History
-export HISTSIZE=1000
-export HISTFILESIZE=2000
-export HISTFILE=$HOME/.ksh_history
-
-# Shell PS1
-export PS1=$'\033[01;32m\$USER\033[00m @ \033[01;34m$(if echo "$PWD" | grep -Eq "^$HOME" ; then echo "$PWD" | sed -e "s|^$HOME|~|g" ; else echo "$PWD" ; fi)\033[00m\
---> '
-
-# Alias
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
-alias cat='bat --style=plain'
-alias clear='clear -x'
+HISTSIZE=1000
+HISTFILESIZE=2000
+HISTFILE=$HOME/.ksh_history
 
 # Fixes
 set -o emacs
+alias cd='1> /dev/null _cd'
 
-# Load Keychain
-eval `keychain --eval --agents ssh ________`
+# Export variables
+export HISTSIZE HISTFILESIZE HISTFILE
 
 [ -z $SHELLRC_SET ] && . ~/.shellrc

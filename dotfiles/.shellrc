@@ -1,19 +1,33 @@
-# Variables
+# If /dev/tty1 launch dwm
+if [ "$(tty)" = '/dev/tty1' ]; then
+  exec startx "$HOME/.xinitrc"
+fi
+
+# Double check not already set
 SHELLRC_SET=1
 
-# $HOME/.user/bin
-export PATH="$HOME/.user/bin:$PATH"
+# Variables
+EDITOR=jupp
 
-# pyenv
-export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init -)"
-( printf "$0" | grep -q -E 'bash$' ) && eval "$(pyenv virtualenv-init -)"
+# Shell PS1
+PS1=$'\033[01;32m$USER\033[00m @ \033[01;34m$(if echo "$PWD" | grep -q -E "^$HOME"; then echo "$PWD" | sed -e "s|^$HOME|~|g"; else echo "$PWD"; fi)\033[00m
+--> '
 
-# rbenv
-export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init -)"
+# Alias
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias cat="bat --style=plain --color auto"
+alias clear='clear -x'
 
-# g
-export GOPATH="$HOME/go"
-export GOROOT="$HOME/.go"
-export PATH="$GOPATH/bin:$PATH"
+# $HOME/.user/bin + shim
+PATH="$HOME/.shim/bin:$PATH"
+eval "$(shim --init)"
+
+# Odin
+PATH="$HOME/Git/grufwub/Odin:$PATH"
+
+# Export variables
+export EDITOR PATH PS1
+
+# Load Keychain
+eval `keychain --eval --agents ssh id_ecdsa`
