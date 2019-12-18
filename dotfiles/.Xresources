@@ -36,12 +36,15 @@
 ! white                                                                                                                                                                                                            
 *.color7: #bfbaac                                                                                                                                                                                                  
 *.color15: #fdf6e3                                                                                                                                                                                                 
+
+! Cursor theme
+Xcursor.theme: capitaine-cursors-light
                                                                                                                                                                                                                    
 !! URxvt Appearance
-URxvt.font: xft:Ubuntu Mono:style=Regular:size=13
-URxvt.boldFont: xft:Ubuntu Mono:style=Bold:size=13
-URxvt.italicFont: xft:Ubuntu Mono:style=Italic:size=13
-URxvt.boldItalicfont: xft:Ubuntu Mono:style=Bold Italic:size=13
+URxvt.font: xft:Ubuntu Mono:style=Regular:size=10
+URxvt.boldFont: xft:Ubuntu Mono:style=Bold:size=10
+URxvt.italicFont: xft:Ubuntu Mono:style=Italic:size=10
+URxvt.boldItalicfont: xft:Ubuntu Mono:style=Bold Italic:size=10
 URxvt.letterSpace: 0
 URxvt.lineSpace: 0
 URxvt.geometry: 92x24
