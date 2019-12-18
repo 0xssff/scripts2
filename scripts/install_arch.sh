@@ -1,12 +1,23 @@
 #!/bin/sh
 
-INSTALL_DISK=''
+INSTALL_DISK="$1"
+shift 1
+
 CRYPTDISK='cryptroot'
 TIMEZONE='Europe/London'
 LOCALE='en_GB.UTF-8'
+USERNAME='grufwub'
 
 partition_disk() {
+  # First lets wipe the drive
+  dd if='/dev/urandom' of="$INSTALL_DISK" bs=1M status=progress
 
+  printf "label: gpt
+device: $INSTALL_DISK
+unit: sectors
+
+$INSTALL_DISK : start=        2048, size=      204800, type=C12A7328-F81F-11D2-BA4B-00A0C93EC93B
+$INSTALL_DISK : start=      206848, size=         max, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4\n" | sudo sfdisk "$INSTALL_DISK"
 }
 
 setup_cryptroot() {
@@ -65,6 +76,7 @@ setup_base() {
   ln -sf "/mnt/usr/share/zoneinfo/$TIMEZONE" '/mnt/etc/localtime'
   sed -i '/mnt/etc/locale.gen' -e "s|^#$LOCALE|$LOCALE|"
   echo "LANG=$LOCALE" >> '/mnt/etc/locale.conf'
+  arch-chroot '/mnt' locale-gen
 
   # Get LUKS disk UUID
   disk_uuid=$(lsblk -o PATH,UUID | grep "$INSTALL_DISK2" | sed -e 's|.*\s||')
@@ -89,29 +101,77 @@ setup_base() {
 }
 
 setup_boot() {
-  mkinitcpio -p 'linux'
-  grub-install --target=x86_64-efi --efi-directory=/boot/efi
-  grub-mkconfig -o /boot/grub/grub.cfg
+  arch-chroot '/mnt' mkinitcpio -p 'linux'
+  arch-chroot '/mnt' grub-install --target=x86_64-efi --efi-directory=/boot/efi
+  arch-chroot '/mnt' grub-mkconfig -o /boot/grub/grub.cfg
 }
 
 intall_extras() {
-  pacman -S btrfs-progs dosfstools apparmor libvirt qemu virt-manager firewalld wget nano neovim xorg-server xorg-xinput xorg-xset xorg-xmodmap keychain networkmanager openvpn networkmanager-openvpn alsa-utils pulseaudio pulseaudio-alsa pavucontrol xfce4-settings xfce4-notifyd arc-gtk-theme macchanger
-}
-
-harden_install() {
-  printf 'kernel.dmesg_restrict = 1\nkernel.kexec_loaded_disabled = 1\nnet.core.bpf_jit_harden = 2\n' > '/etc/sysctl.d/51-security.conf'
+  arch-chroot '/mnt' pacman -S btrfs-progs dosfstools apparmor libvirt qemu virt-manager firewalld wget nano neovim xorg-server xorg-xinput xorg-xset xorg-xmodmap keychain networkmanager openvpn networkmanager-openvpn alsa-utils pulseaudio pulseaudio-alsa pavucontrol xfce4-settings xfce4-notifyd arc-gtk-theme macchanger xsecurelock
 }
 
 setup_extras() {
-  systemctl enable NetworkManager
-  systemctl enable apparmor
-  systemctl enable firewalld
+  arch-chroot '/mnt' systemctl enable NetworkManager
+  arch-chroot '/mnt' systemctl enable apparmor
+  arch-chroot '/mnt' systemctl enable firewalld
 
-  # firewalld to iptables
-
-  # macspoof systemd + enable
+  # Setup firewalld to work correctly
+  sed -i '/mnt/etc/firewalld/firewalld.conf' -e 's|FirewallBackend=.*|FirewallBackend=iptables|'
 }
 
+setup_user() {
+  arch-chroot '/mnt' "useradd -m -g users -G wheel '$USERNAME'"
+  arch-chroot '/mnt' "groupadd '$USERNAME'"
+  arch-chroot '/mnt' "passwd '$USERNAME'"
+  arch-chroot '/mnt' "passwd --lock root"
+}
+
+recurse_copy_files() {
+  local fspath=$(echo "$1" | sed -e "s|^$2||")
+
+  for f in $(ls -a "$1"); do
+    [ "$f" = '.'  ] && continue
+    [ "$f" = '..' ] && continue
+
+    if [ -d "$1/$f" ]; then
+      recurse_copy_files "$1/$f" "$2"
+    else
+      mkdir -p "$fspath"
+      cp "$1/$f" "$fspath"
+    fi
+  done
+}
+
+grab_scripts_repo_contents() {
+  local repopath='/tmp/git-scripts'
+
+  # Need to enter /mnt for this...
+  cd '/mnt'
+
+  # Grab custom config files from github.com/grufwub/scripts
+  git clone 'https://github.com/grufwub/scripts' "$repopath/tmp/git-scripts"
+  recurse_copy_files "$repopath/fsroot"
+
+  # Copy over dotfiles from cloned repository
+  for f in $(ls -a "$repopath/dotfiles"); do
+    cp "$repopath/dotfiles/$f" "/home/$USERNAME"
+  done
+
+  # Can back out of /mnt now
+  cd ../
+
+  # Copy scripts to userdir temporarily (sometimes /tmp gets cleared on arch-chroot)
+  cp "/mnt$repopath/scripts/install_dwm.sh"      "/mnt/home/$USERNAME"
+  cp "/mnt$repopath/scripts/install_ksh.sh"      "/mnt/home/$USERNAME"
+  cp "/mnt$repopath/scripts/install_slstatus.sh" "/mnt/home/$USERNAME"
+
+  # Install dwm, jupp and slstatus (easier to do by chroot)
+  arch-chroot '/mnt' "su $USERNAME -c sh /home/$USERNAME/install_dwm.sh"
+  arch-chroot '/mnt' "su $USERNAME -c sh /home/$USERNAME/install_ksh.sh"
+  arch-chroot '/mnt' "su $USERNAME -c sh /home/$USERNAME/install_slstatus.sh"
+}
+
+set -e
 partition_disk
 setup_cryptroot
 setup_filesystems
@@ -119,15 +179,14 @@ final_mount
 pacstrap_install
 create_luks_keyfile
 setup_base
-
-# time to enter the filesystem
-arch-chroot '/mnt'
 setup_boot
 install_extras
 setup_extras
+setup_user
+grab_scripts_repo_contents
+set +e
 
-# time to exit chroot, unmount, reboot
-exit
+# Time to finish up and reboot
 umount -R '/mnt'
 cryptsetup luksClose "$CRYPTDISK"
 reboot
