@@ -41,7 +41,7 @@ case "$1" in
 		exit 0
 		;;
 	'show')
-		cat "$BRIGHTFILE"
+		printf '%s / %s\n' "$(cat $BRIGHTFILE)" "$MAX_BRIGHT"
 		exit 0
 		;;
 	'up')
