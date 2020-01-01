@@ -1,7 +1,7 @@
 # If /dev/tty1 launch dwm
-if [ "$(tty)" = '/dev/tty1' ]; then
-  exec startx "$HOME/.xinitrc"
-fi
+#if [ "$(tty)" = '/dev/tty1' ]; then
+#  exec startx "$HOME/.xinitrc"
+#fi
 
 # Double check not already set
 SHELLRC_SET=1
@@ -25,6 +25,26 @@ eval "$(shim --init)"
 
 # Odin
 PATH="$HOME/Git/grufwub/Odin:$PATH"
+
+# pyenv
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+# well this is broken on ksh so let's do it manually
+#eval "$(pyenv virtualenv-init -)"
+export PATH="$HOME/.pyenv/plugins/pyenv-virtualenv/shims:$PATH"
+export PYENV_VIRTUALENV_INIT=1
+_pyenv_virtualenv_hook() {
+  local ret=$?
+  if [ -n "$VIRTUAL_ENV" ]; then
+    eval "$(pyenv sh-activate --quiet || pyenv sh-deactivate --quiet || true)" || true
+  else
+    eval "$(pyenv sh-activate --quiet || true)" || true
+  fi
+  return $ret
+}
+
+# fomu
+export PATH="$HOME/Git/misc/fomu-toolchain/bin:$PATH"
 
 # Export variables
 export EDITOR PATH PS1
