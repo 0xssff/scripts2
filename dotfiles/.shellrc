@@ -1,13 +1,8 @@
-# If /dev/tty1 launch dwm
-#if [ "$(tty)" = '/dev/tty1' ]; then
-#  exec startx "$HOME/.xinitrc"
-#fi
-
 # Double check not already set
 SHELLRC_SET=1
 
 # Variables
-EDITOR=jupp
+EDITOR=nano
 
 # Shell PS1
 PS1=$'\033[01;32m$USER\033[00m @ \033[01;34m$(if echo "$PWD" | grep -q -E "^$HOME"; then echo "$PWD" | sed -e "s|^$HOME|~|g"; else echo "$PWD"; fi)\033[00m
@@ -43,8 +38,8 @@ _pyenv_virtualenv_hook() {
   return $ret
 }
 
-# fomu
-export PATH="$HOME/Git/misc/fomu-toolchain/bin:$PATH"
+# Odin
+export PATH="$HOME/.odin:$PATH"
 
 # Export variables
 export EDITOR PATH PS1

@@ -1,68 +1,20 @@
-## Automatically indent a newly created line to the same number of
-## tabs and/or spaces as the preceding line -- or as the next line
-## if the preceding line is the beginning of a paragraph.
 set autoindent
-
-## Use bold text instead of reverse video text.
 set boldtext
-
-## Do case-sensitive searches by default.
 # set casesensitive
-
-## Constantly display the cursor position in the status bar.  Note that
-## this overrides "quickblank".
 set constantshow
-
-## Use cut-from-cursor-to-end-of-line by default.
 # set cutfromcursor
-
-## Do not use the line below the title bar, leaving it entirely blank.
 set emptyline
-
-## Scroll the buffer contents per half-screen instead of per line.
 set jumpyscrolling
-
-## Switch on multiple file buffers (inserting a file will put it into
-## a separate buffer).
-# set multibuffer
-
-## Don't convert files from DOS/Mac format.
+set multibuffer
 set noconvert
-
-## Don't display the helpful shortcut lists at the bottom of the screen.
 set nohelp
-
-## Don't automatically add a newline when a file does not end with one.
 set nonewlines
-
-## Do regular-expression searches by default.
-## Regular expressions are of the extended type (ERE).
 set regexp
-
-## Make the Home key smarter.  When Home is pressed anywhere but at the
-## very beginning of non-whitespace characters on a line, the cursor
-## will jump to that beginning (either forwards or backwards).  If the
-## cursor is already at that position, it will jump to the true
-## beginning of the line.
 set smarthome
-
-## Enable soft line wrapping (AKA full-line display).
 set softwrap
-
-## Use this tab size instead of the default; it must be greater than 0.
 set tabsize 4
-
-## Convert typed tabs to spaces.
 set tabstospaces
-
-## The two single-column characters used to display the first characters
-## of tabs and spaces.  187 in ISO 8859-1 (0000BB in Unicode) and 183 in
-## ISO-8859-1 (0000B7 in Unicode) seem to be good values for these.
-## The default when in a UTF-8 locale:
 set whitespace "»·"
-
-## Paint the interface elements of nano.  These are examples;
-## by default there are no colors, except for errorcolor.
 set titlecolor brightmagenta
 set statuscolor brightmagenta
 set errorcolor brightwhite,red
@@ -72,6 +24,6 @@ set numbercolor cyan
 set keycolor brightmagenta
 set functioncolor magenta
 
-## To include all existing syntax definitions, you can do:
+## Download and clone git repo below:
 ## https://github.com/scopatz/nanorc
 include ~/.nano/nanorc/*.nanorc
