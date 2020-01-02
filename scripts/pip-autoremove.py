@@ -48,7 +48,7 @@ def check_packages(package_list):
     if package == "": continue
     info = package_info(package)
     if not info: continue
-    package_dict[package] = package_info(package)
+    package_dict[package] = info
 
 def uninstall_packages():
   global package_dict, uninstalled_dict
@@ -69,22 +69,18 @@ def handle_uninstall():
   print("> Uninstalling the following packages:")
   for package in package_dict.keys():
     print(package)
-
   print("> Would you like to proceed? [y/n]")
   if not user_input_proceed(): return RETURN_CANCEL
-
   while True:
     print("\n> Would you like to keep any of these?")
     print("> Type package names to keep, separated by spaces:")
     invalid = False
     entries = input()
-
     if entries != "":
       for entry in entries:
         if entry not in package_dict:
           print("> Invalid entry: %s" % entry)
           invalid = True
-
       if invalid:
         print("> Failed to parse entries. Would you like to try again? [y / n]")
         if not user_input_proceed():
@@ -96,7 +92,6 @@ def handle_uninstall():
         for entry in entries:
           del package_dict[entry]
     break
-
   uninstall_packages()
   return RETURN_OK
 
