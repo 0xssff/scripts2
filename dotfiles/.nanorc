@@ -73,4 +73,5 @@ set keycolor brightmagenta
 set functioncolor magenta
 
 ## To include all existing syntax definitions, you can do:
-include "/usr/share/nano/*.nanorc"
+## https://github.com/scopatz/nanorc
+include ~/.nano/nanorc/*.nanorc
