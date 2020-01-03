@@ -1,0 +1,29 @@
+set autoindent
+set boldtext
+# set casesensitive
+set constantshow
+# set cutfromcursor
+set emptyline
+set jumpyscrolling
+set multibuffer
+set noconvert
+set nohelp
+set nonewlines
+set regexp
+set smarthome
+set softwrap
+set tabsize 4
+set tabstospaces
+set whitespace "»·"
+set titlecolor brightmagenta
+set statuscolor brightmagenta
+set errorcolor brightwhite,red
+set selectedcolor brightwhite,magenta
+set stripecolor ,yellow
+set numbercolor cyan
+set keycolor brightmagenta
+set functioncolor magenta
+
+## Download and clone git repo below:
+## https://github.com/scopatz/nanorc
+include ~/.nano/nanorc/*.nanorc
