@@ -1,0 +1,50 @@
+#!/bin/sh
+
+AGENT_FILE="/tmp/.$(whoami).ssh_agent"
+KEYS_FILE="/tmp/.$(whoami).ssh_keys"
+
+create_agent() {
+    if [ ! -f "$AGENT_FILE" ]; then
+        rm -f "$KEYS_FILE"
+        ssh-agent -s | sed -e 's|^echo.*||' > "$AGENT_FILE"
+        echo 'echo "Loaded keychain!"'     >> "$AGENT_FILE"
+        chmod 400 "$AGENT_FILE"
+    fi
+}
+
+add_key() {
+    [ ! -f "$KEYS_FILE" ] && touch "$KEYS_FILE"
+
+    if ! (grep -q -E "^$1$" "$KEYS_FILE"); then
+        ssh-add "$1" && (echo "$1" >> "$KEYS_FILE")
+    fi
+}
+
+check_create_agent() {
+    local output
+
+    create_agent
+    eval `cat "$AGENT_FILE"` > /dev/null 2>&1
+
+    output=$(ssh-add -l) > /dev/null 2>&1
+    if [ $? -ne 0 ] && [ "$output" != "The agent has no identities." ]; then
+        rm -f "$AGENT_FILE"
+        create_agent
+        eval `cat "$AGENT_FILE"` > /dev/null 2>&1
+    fi
+}
+
+[ $# -eq 0 ] && exit 0
+
+# Check agent created, try to load, recreate if needed
+check_create_agent
+
+# Add supplied key(s)
+for key in "$@"; do
+    add_key "$key"
+done
+
+# Finally output agent file to allow
+# script output to be saved into calling
+# shell
+cat "$AGENT_FILE"
