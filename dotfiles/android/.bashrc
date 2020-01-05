@@ -63,23 +63,15 @@ fi
 # Export variables
 export EDITOR PATH PS1 HISTSIZE HISTFILESIZE
 
-# Here ends root!
-if [ $_ROOT ]; then
+# Finally, user specific env setup!
+if [ $_TERMUX ]; then
+    # Execute user shell scripts
+
+    logindir='/data/data/com.termux/files/home/login.d'
+    for script in $(/bin/ls "$logindir"); do
+        [ -x "$logindir/$script" ] && . $logindir/$script
+    done
+    unset script logindir _TERMUX
+elif [ $_ROOT ]; then
     unset _ROOT
-else
-    # Termux user specific shell setup
-    if [ $_TERMUX ]; then
-
-        # Execute user shell scripts
-        logindir='/data/data/com.termux/files/home/login.d'
-        for script in $(/bin/ls "$logindir"); do
-            [ -x "$logindir/$script" ] && . $logindir/$script
-        done
-        unset script logindir
-
-        unset _TERMUX
-    fi
-
-    # ssh
-    eval `keychain "$HOME/.ssh/id_ecdsa"`
 fi
