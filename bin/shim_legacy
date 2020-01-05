@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# @grufwub
+# PLATFORM: DESKTOP
+# though probably works on any ¯\_(ツ)_/¯
 
 # Readonly variables
 readonly USER_DIR="$HOME/.user"

@@ -1,4 +1,10 @@
 #!/bin/bash
+#
+# @grufwub
+# PLATFORM: DESKTOP
+# though could be used with any ¯\_(ツ)_/¯
+#
+# Hacky workaround for xbacklight not working :p
 
 BRIGHTDIR='/sys/class/backlight/intel_backlight'
 BRIGHTFILE="$BRIGHTDIR/brightness"

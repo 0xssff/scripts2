@@ -1,22 +1,23 @@
-#!/bin/sh
+#!/system/bin/sh
+#
+# @grufwub
+# PLATFORM: ANDROID
+# though could be used with any with right mods ¯\_(ツ)_/¯
+#
+# Script replacement for Funtoo's keychain on systems that
+# don't have immediate access to ps.
+#
+# please note: on android GNU ps doesn't work but if you
+# symlink busybox to ps Funtoo's keychain will work fine.
+# unfortunately it's not in termux repos :D
 
-AGENT_FILE="/tmp/.$(whoami).ssh_agent"
-KEYS_FILE="/tmp/.$(whoami).ssh_keys"
+AGENT_FILE="$HOME/.keychain_agent"
 
 create_agent() {
     if [ ! -f "$AGENT_FILE" ]; then
         rm -f "$KEYS_FILE"
-        ssh-agent -s | sed -e 's|^echo.*||' > "$AGENT_FILE"
-        echo 'echo "Loaded keychain!"'     >> "$AGENT_FILE"
+        ssh-agent -s | busybox sed -e 's|^echo.*||' > "$AGENT_FILE"
         chmod 400 "$AGENT_FILE"
-    fi
-}
-
-add_key() {
-    [ ! -f "$KEYS_FILE" ] && touch "$KEYS_FILE"
-
-    if ! (grep -q -E "^$1$" "$KEYS_FILE"); then
-        ssh-add "$1" && (echo "$1" >> "$KEYS_FILE")
     fi
 }
 
@@ -24,22 +25,36 @@ check_create_agent() {
     local output
 
     create_agent
-    eval `cat "$AGENT_FILE"` > /dev/null 2>&1
+    eval `cat "$AGENT_FILE"`
 
-    output=$(ssh-add -l) > /dev/null 2>&1
+    output=$(ssh-add -l)
     if [ $? -ne 0 ] && [ "$output" != "The agent has no identities." ]; then
         rm -f "$AGENT_FILE"
         create_agent
-        eval `cat "$AGENT_FILE"` > /dev/null 2>&1
+        eval `cat "$AGENT_FILE"`
     fi
 }
 
-[ $# -eq 0 ] && exit 0
+add_key() {
+    local filename filecontents
 
-# Check agent created, try to load, recreate if needed
+    if ! (echo "$1" | busybox grep -qe '\.pub$'); then
+        filename="$1.pub"
+    else
+        filename="$1"
+    fi
+
+    filecontents=$(cat "$filename")
+    if ! (ssh-add -L | busybox grep -qe "^$filecontents$"); then
+        ssh-add "$1"
+    fi
+}
+
+# Check agent created, try to load,
+# recreate if needed
 check_create_agent
 
-# Add supplied key(s)
+# Add supplied key(s), don't bother if none supplied
 for key in "$@"; do
     add_key "$key"
 done

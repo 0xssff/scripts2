@@ -1,4 +1,7 @@
 #!/bin/sh
+#
+# @grufwub
+# PLATFORM: DESKTOP
 
 # set $XDG_MENU_PREFIX to "xfce-" so that "xfce-applications.menu" is picked
 # over "applications.menu" in all Xfce applications.

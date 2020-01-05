@@ -18,8 +18,6 @@ Plug 'kiddos/malokai.vim'
 
 " " Syntax
 "
-" Odin
-Plug 'Tetralux/odin.vim'
 call plug#end()
 
 syntax on

@@ -1,0 +1,19 @@
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+# Check checksums (ensure no changes!)
+for line in $(cat '/etc/bash/checksums'); do
+    f=$(echo "$line" | cut -d':' -f1)
+    s=$(echo "$line" | cut -d':' -f2)
+    new_s=$(sha512sum "$f" | cut -d' ' -f1)
+    if [ "$new_s" != "$s" ]; then
+        echo "checksum mismatch on: $f"
+        exit 0
+    fi
+done
+
+. /data/data/com.termux/files/usr/etc/bash.bashrc

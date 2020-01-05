@@ -1,0 +1,34 @@
+#!/system/bin/sh
+#
+# @grufwub
+# PLATFORM: ANDROID
+#
+# Create checksums for .bashrc, .nanorc, bash.bashrc
+# so  on launch of root shell I can feel safe knowing
+# root isn't sourcing tampered scripts on env setup :]
+
+CHECKSUM_FILE="/etc/bash/checksums"
+
+checksum() {
+    sha512sum "$1" | cut -d' ' -f1
+}
+
+main() {
+    local bashrc shellrc nanorc termux_home
+
+    termux_home='/data/data/com.termux/files'
+    bash=$(checksum "$termux_home/usr/etc/bash.bashrc")
+    bashrc=$(checksum "$termux_home/home/.bashrc")
+    nanorc=$(checksum "$termux_home/home/.nanorc")
+
+    echo "$termux_home/usr/etc/bash.bashrc:$bash" > "$CHECKSUM_FILE"
+    echo "$termux_home/home/.bashrc:$bashrc"     >> "$CHECKSUM_FILE"
+    echo "$termux_home/home/.nanorc:$nanorc"     >> "$CHECKSUM_FILE"
+}
+
+if [ $(id -ru) -ne 0 ]; then
+    echo 'Please re-run this script as root!'
+    exit 1
+fi
+
+main
