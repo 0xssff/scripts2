@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# @grufwub
+# PLATFORM: ANY
+#
+# Read any files you place in $HOME/notices.d and
+# offer to delete after reading
+
+display_notices() {
+    local loopable_contents answer
+
+    for notice in $(ls "$HOME/notices.d"); do
+        echo "> > >"
+        cat "$HOME/notices.d/$notice"
+        echo ""
+        echo -n "Delete this notice? [y/N] "
+        read -r answer
+        echo "> > >"
+        echo ""
+        answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
+        if [ $answer = 'y' ] || [ $answer = 'yes' ]; then
+            rm -f "$HOME/notices.d/$notice"
+        else
+            continue
+        fi
+    done
+}
+
+echo ""
+echo "-------------------------"
+echo "@grufwub's notices board!"
+echo ""
+display_notices
+echo "End of notices"
+echo "-------------------------"
