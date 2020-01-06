@@ -1,0 +1,102 @@
+#!/system/bin/sh
+#
+# @grufwub
+# PLATFORM: ANDROID
+# though could be used with any with right mods ¯\_(ツ)_/¯
+#
+# Backups up supplied items (files / dirs) to a preset remote
+# directory via scp
+
+LAST_BACKUP="$HOME/.last_backup"
+TIME_DIFF=3600
+REMOTE=''
+
+last_backup_time_diff() {
+    local now_time backup_time time_diff
+
+    if [ -f "$LAST_BACKUP" ]; then
+        now_time=$(date +%s)
+        backup_time=$(date -r "$LAST_BACKUP" +%s)
+        let time_diff="$now_time - $backup_time"
+        echo $time_diff
+    else
+        echo $TIME_DIFF
+    fi
+}
+
+backup_items() {
+    local tmp_dir cur_dir backup_dir item_added
+
+    cur_dir=$(pwd)
+    tmp_dir=$(mktemp -d)
+    mkdir "$tmp_dir/backup"
+    cd "$tmp_dir"
+
+    for item in "$@"; do
+        # Add to $tmp_dir only if file or dir (no special
+        # file types!)
+        if [ -f "$item" ]; then
+            cp "$item" "backup/" || return 1
+        elif [ -d "$item" ]; then
+            cp -r "$item" "backup/" || return 1
+        else
+            echo "Cannot backup: $item"
+            continue
+        fi
+
+        item_added=0
+        echo "Added $item to backup directory"
+    done
+
+    if [ $item_added ]; then
+        echo ""
+        echo "Tar'ing backup directory..."
+#        cd 'backup'
+        tar -czvf "$tmp_dir/android_backup.tar.gz" backup/. || return 1
+
+        echo ""
+        echo "Copying to remote directory..."
+        scp "$tmp_dir/android_backup.tar.gz" "$REMOTE" || return 1
+
+        touch "$LAST_BACKUP"
+    fi
+
+    cd "$cur_dir"
+#    rm -rf "$tmp_dir"
+
+    return 0
+}
+
+main() {
+    local result=0
+
+    echo "---------------------------------"
+    echo "@grufwub's android backup script!"
+    echo ""
+
+    echo "Getting last backup date..."
+    echo ""
+
+    if [ $(last_backup_time_diff) -lt $TIME_DIFF ]; then
+        echo "Skipping! Backup performed recently"
+    else
+        backup_items "$@"
+        result=$?
+    fi
+
+    if [ $result -ne 0 ]; then
+        echo ""
+        echo "Failed!"
+    else
+        echo ""
+        echo "Done!"
+    fi
+    echo "--------------------------------"
+}
+
+if [ $# -lt 1 ]; then
+    echo "Please re-run script with backup items as separate arguments!"
+    exit 0
+fi
+
+main "$@"
