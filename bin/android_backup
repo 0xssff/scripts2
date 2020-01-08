@@ -9,7 +9,8 @@
 
 LAST_BACKUP="$HOME/.last_backup"
 TIME_DIFF=3600
-REMOTE=''
+REMOTE='______'
+GPG_KEY='______'
 
 last_backup_time_diff() {
     local now_time backup_time time_diff
@@ -50,13 +51,12 @@ backup_items() {
 
     if [ $item_added ]; then
         echo ""
-        echo "Tar'ing backup directory..."
-#        cd 'backup'
-        tar -czvf "$tmp_dir/android_backup.tar.gz" backup/. || return 1
+        echo "Tar'ing and encrypting backup directory..."
+        tar -czv backup/. | gpg -e -r "$GPG_KEY" -o 'android_backup.tar.gz' || return 1
 
         echo ""
         echo "Copying to remote directory..."
-        scp "$tmp_dir/android_backup.tar.gz" "$REMOTE" || return 1
+        rsync --progress "$tmp_dir/android_backup.tar.gz" "$REMOTE" || return 1
 
         touch "$LAST_BACKUP"
     fi
@@ -70,6 +70,7 @@ backup_items() {
 main() {
     local result=0
 
+    echo ""
     echo "---------------------------------"
     echo "@grufwub's android backup script!"
     echo ""
