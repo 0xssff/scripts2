@@ -10,15 +10,13 @@ display_notices() {
     local loopable_contents answer
 
     for notice in $(ls "$HOME/notices.d"); do
-        echo "> > >"
+        echo -n "* "
         cat "$HOME/notices.d/$notice"
-        echo ""
-        echo -n "Delete this notice? [y/N] "
+        echo -n "> Delete this notice? [y/N] "
         read -r answer
-        echo "> > >"
         echo ""
         answer=$(echo "$answer" | tr '[:upper:]' '[:lower:]')
-        if [ $answer = 'y' ] || [ $answer = 'yes' ]; then
+        if [ "$answer" = 'y' ] || [ "$answer" = 'yes' ]; then
             rm -f "$HOME/notices.d/$notice"
         else
             continue
