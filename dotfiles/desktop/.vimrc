@@ -22,6 +22,7 @@ Plug 'kiddos/malokai.vim'
 Plug 'Tetralux/odin.vim'
 call plug#end()
 
+set laststatus=2
 syntax on
 " colorscheme malokai
 
