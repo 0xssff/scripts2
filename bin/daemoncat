@@ -1,0 +1,102 @@
+#!/bin/sh
+#
+# @grufwub
+
+LOGCAT_DIR="$HOME/logcat"
+LOGCAT_LOG="$LOGCAT_DIR/logcat.log"
+PID_FILE="$LOGCAT_DIR/logcat.pid"
+MAX_SIZE=8192
+MAX_ROTATIONS=10
+LOG_LEVEL='E'
+LOG_BUFFER='all'
+LOGCAT_ARGS="--format=time,epoch,printable --buffer=$LOG_BUFFER -r $MAX_SIZE -n $MAX_ROTATIONS -f $LOGCAT_LOG *:$LOG_LEVEL"
+
+logcat_cmd() {
+    logcat $LOGCAT_ARGS
+}
+
+usage() {
+    echo "$(basename "$0") [start / stop / status]"
+    exit 0
+}
+
+is_running() {
+    local pid
+
+    # If ps not found, always return not-running
+    (which ps > /dev/null 2>&1) || return 1
+
+    if [ ! -f "$PID_FILE" ]; then
+        # See if logcat running manually
+        pid=$(ps ax | grep -v 'grep' | grep "/system/bin/logcat $LOGCAT_ARGS" | cut -d' ' -f1)
+    else
+        pid=$(cat "$PID_FILE")
+    fi
+
+    if [ "$1" = '--print-pid' ]; then
+        echo "$pid"
+    else
+        ps -p "$pid" > /dev/null 2>&1
+    fi
+}
+
+status() {
+    if (is_running); then
+        echo "Started: logcat is running"
+    else
+        echo "Stopped: logcat is not running"
+    fi
+
+    exit 0
+}
+
+stop() {
+    local pid
+
+    pid=$(is_running --print-pid)
+    if [ -z "$pid" ]; then
+        echo "Failed to stop, logcat is not running!"
+        exit 1
+    fi
+}
+
+start() {
+    local pid
+
+    logcat_cmd &
+    echo "$!" > "$PID_FILE"
+
+    pid=$(is_running --print-pid)
+    if [ -z "$pid" ]; then
+        echo "Failed to start  logcat!"
+        exit 1
+    fi
+}
+
+# Ensure logcat directory exists
+[ ! -d "$LOGCAT_DIR" ] && mkdir "$HOME/logcat"
+
+# Invalid arg count, do nothing
+[ $# -ne 1 ] && usage
+
+# Handle args
+case "$1" in
+    'start')
+        start
+        exit 0
+        ;;
+
+    'stop')
+        stop
+        exit 0
+        ;;
+
+    'status')
+        status
+        exit 0
+        ;;
+
+    *)
+        usage
+        exit 1
+esac
