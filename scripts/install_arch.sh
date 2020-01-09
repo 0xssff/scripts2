@@ -37,6 +37,7 @@ setup_filesystems() {
   mkdir -p '/tmp/mnt'
   mount "/dev/mapper/$CRYPTROOT" '/tmp/mnt'
   btrfs subvolume create '/tmp/mnt/sv_root'
+  btrfs subvolume create '/tmp/mnt/sv_boot'
   btrfs subvolume create '/tmp/mnt/sv_home'
   btrfs subvolume create '/tmp/mnt/sv_var'
   btrfs subvolume create '/tmp/mnt/sv_var_log'
@@ -51,6 +52,7 @@ btrfs_mount() {
 
 final_mount() {
   btrfs_mount 'sv_root' ''
+  mkdir -p '/mnt/boot'     && btrfs_mount 'sv_boot'        '/boot'
   mkdir -p '/mnt/home'     && btrfs_mount 'sv_home'        '/home'
   mkdir -p '/mnt/var'      && btrfs_mount 'sv_var'         '/var'
   mkdir -p '/mnt/var/log'  && btrfs_mount 'sv_var_log'     '/var/log'
@@ -60,7 +62,7 @@ final_mount() {
 }
 
 pacstrap_install() {
-  pacstrap '/mnt' base base-devel linux linux-firmware grub btrfs-progs dosfstools curl git
+  pacstrap '/mnt' base base-devel linux linux-firmware systemd-resolvconf grub btrfs-progs dosfstools curl git
 }
 
 create_luks_keyfile() {
@@ -154,7 +156,12 @@ grab_scripts_repo_contents() {
 
   # Copy over dotfiles from cloned repository
   for f in $(ls -a "$repopath/dotfiles"); do
-    cp "$repopath/dotfiles/$f" "/home/$USERNAME"
+    [ "$f" = '.' ] || [ "$f" = '..' ] && continue
+    if [ -f "$f" ]; then
+      cp "$repopath/dotfiles/desktop/$f" "home/$USERNAME"
+    else
+      cp -r "$repopath/dotfiles/desktop/$f" "home/$USERNAME"
+    fi
   done
 
   # Can back out of /mnt now
@@ -165,9 +172,8 @@ grab_scripts_repo_contents() {
   cp "/mnt$repopath/scripts/install_ksh.sh"      "/mnt/home/$USERNAME"
   cp "/mnt$repopath/scripts/install_slstatus.sh" "/mnt/home/$USERNAME"
 
-  # Install dwm, jupp and slstatus (easier to do by chroot)
+  # Install dwm, and slstatus (easier to do by chroot)
   arch-chroot '/mnt' "su $USERNAME -c sh /home/$USERNAME/install_dwm.sh"
-  arch-chroot '/mnt' "su $USERNAME -c sh /home/$USERNAME/install_ksh.sh"
   arch-chroot '/mnt' "su $USERNAME -c sh /home/$USERNAME/install_slstatus.sh"
 }
 
