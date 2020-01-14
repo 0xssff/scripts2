@@ -27,7 +27,7 @@ check_create_agent() {
     create_agent
     eval `cat "$AGENT_FILE"`
 
-    output=$(ssh-add -l)
+    output=$(ssh-add -l) > /dev/null 2>&1
     if [ $? -ne 0 ] && [ "$output" != "The agent has no identities." ]; then
         rm -f "$AGENT_FILE"
         create_agent

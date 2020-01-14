@@ -8,11 +8,21 @@ PID_FILE="$LOGCAT_DIR/logcat.pid"
 MAX_SIZE=8192
 MAX_ROTATIONS=10
 LOG_LEVEL='E'
-LOG_BUFFER='all'
+LOG_BUFFER='all,kernel'
 LOGCAT_ARGS="--format=time,epoch,printable --buffer=$LOG_BUFFER -r $MAX_SIZE -n $MAX_ROTATIONS -f $LOGCAT_LOG *:$LOG_LEVEL"
 
-logcat_cmd() {
-    logcat $LOGCAT_ARGS
+ps_cmd() {
+    if [ ! -f '/data/data/com.termux/files/usr/bin/ps' ]; then
+        echo "Valid ps command not found!"
+        exit 1
+    fi
+
+    /data/data/com.termux/files/usr/bin/ps $@
+}
+
+logcat_start() {
+    logcat $LOGCAT_ARGS &
+    echo "$!" > "$PID_FILE"
 }
 
 usage() {
@@ -23,12 +33,9 @@ usage() {
 is_running() {
     local pid
 
-    # If ps not found, always return not-running
-    (which ps > /dev/null 2>&1) || return 1
-
     if [ ! -f "$PID_FILE" ]; then
         # See if logcat running manually
-        pid=$(ps ax | grep -v 'grep' | grep "/system/bin/logcat $LOGCAT_ARGS" | cut -d' ' -f1)
+        pid=$(ps_cmd ax | grep -v 'grep' | grep "logcat $LOGCAT_ARGS" | cut -d' ' -f1)
     else
         pid=$(cat "$PID_FILE")
     fi
@@ -36,7 +43,7 @@ is_running() {
     if [ "$1" = '--print-pid' ]; then
         echo "$pid"
     else
-        ps -p "$pid" > /dev/null 2>&1
+        ps_cmd -p "$pid" > /dev/null 2>&1
     fi
 }
 
@@ -58,16 +65,15 @@ stop() {
         echo "Failed to stop, logcat is not running!"
         exit 1
     fi
+
+    kill -9 $pid
+    rm "$PID_FILE"
 }
 
 start() {
-    local pid
+    logcat_start
 
-    logcat_cmd &
-    echo "$!" > "$PID_FILE"
-
-    pid=$(is_running --print-pid)
-    if [ -z "$pid" ]; then
+    if ! (is_running); then
         echo "Failed to start  logcat!"
         exit 1
     fi
