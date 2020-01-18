@@ -1,0 +1,60 @@
+#!/usr/bin/env sh
+#
+# @grufwub
+# PLATFORM: DESKTOP
+#
+# Script replacement for Funtoo's keychain on systems that
+# don't have immediate access to ps.
+
+AGENT_FILE="$HOME/.keychain_agent"
+
+create_agent() {
+    if [ ! -f "$AGENT_FILE" ]; then
+        rm -f "$KEYS_FILE"
+        ssh-agent -s | sed -e 's|^echo.*||' > "$AGENT_FILE"
+        chmod 400 "$AGENT_FILE"
+    fi
+}
+
+check_create_agent() {
+    local output
+
+    create_agent
+    eval `cat "$AGENT_FILE"`
+
+    output=$(ssh-add -l) > /dev/null 2>&1
+    if [ $? -ne 0 ] && [ "$output" != "The agent has no identities." ]; then
+        rm -f "$AGENT_FILE"
+        create_agent
+        eval `cat "$AGENT_FILE"`
+    fi
+}
+
+add_key() {
+    local filename filecontents
+
+    if ! (echo "$1" | grep -qE '\.pub$'); then
+        filename="$1.pub"
+    else
+        filename="$1"
+    fi
+
+    filecontents=$(cat "$filename")
+    if ! (ssh-add -L | grep -q "$filecontents"); then
+        ssh-add "$1"
+    fi
+}
+
+# Check agent created, try to load,
+# recreate if needed
+check_create_agent
+
+# Add supplied key(s), don't bother if none supplied
+for key in "$@"; do
+    add_key "$key"
+done
+
+# Finally output agent file to allow
+# script output to be saved into calling
+# shell
+cat "$AGENT_FILE"
