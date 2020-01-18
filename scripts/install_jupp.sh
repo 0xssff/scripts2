@@ -10,7 +10,8 @@ TAR_DIR='jupp'
 C_FLAGS='-O2 -fno-delete-null-pointer-checks -fwrapv -fno-strict-aliasing'
 PREFIX_DIR='/usr/local'
 SYSCONF_DIR='/etc'
-CONF_ARGS="--prefix=$PREFIX_DIR --sysconfdir=$SYSCONF_DIR --disable-dependency-tracking --disable-termidx" # --disable-getpwnam 
+TMP_DIR='/tmp'
+CONF_ARGS=''
 
 silent() {
   $@ > /dev/null 2>&1
@@ -63,6 +64,18 @@ initial_checks() {
   bin_check sha256sum || bin_check cksum || result=1
   bin_check gcc       || result=1
 
+  # Check if chromeOS
+  if (env | grep -qE '^CHROMEOS_RELEASE'); then
+    printf 'Detected chromeOS shell environment!\n'
+    SYSCONF_DIR='/usr/local/etc'
+    TMP_DIR='/usr/local/tmp'
+    printf 'Set SYSCONF_DIR=%s\n' "$SYSCONF_DIR"
+    printf 'Set TMP_DIR=%s\n' "$TMP_DIR"
+  fi
+
+  # Set CONF_ARGS
+  CONF_ARGS="$CONF_ARGS --prefix=$PREFIX_DIR --sysconfdir=$SYSCONF_DIR --disable-dependency-tracking --disable-termidx" # --disable-getpwnam
+
   return $result
 }
 
@@ -114,7 +127,7 @@ main() {
 
   # Go to temporary directory
   orig_dir=$(pwd)
-  temp_dir=$(mktemp -d)
+  temp_dir=$(mktemp -p "$TMP_DIR" -d)
 
   printf "Entering temp dir: $temp_dir\n"
   cd "$temp_dir"
