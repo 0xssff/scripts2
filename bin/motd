@@ -12,7 +12,7 @@ ext_ip=$(curl --silent icanhazip.com)
 true | openssl s_client -connect notbird.site:443 > /dev/null 2>&1
 notbird_up=$?
 
-disk_usage=$(df -h | grep -vE '(^Filesystem)|(^tmpfs)|(^dev)|(^run)')
+disk_usage=$(df -h | grep -vE '(^Filesystem\s)|(^tmpfs\s)|(^tmp\s)|(^dev\s)|(^shm\s)|(^run\s)')
 
 # Clear screen and print header
 clear -x
