@@ -40,7 +40,7 @@ add_key() {
     fi
 
     filecontents=$(cat "$filename")
-    if ! (ssh-add -L | grep -q "$filecontents"); then
+    if ! (ssh-add -L | grep -q "$filecontents") > /dev/null 2>&1; then
         ssh-add "$1"
     fi
 }
