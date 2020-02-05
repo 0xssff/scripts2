@@ -1,3 +1,11 @@
+# systemd service
+#
+# @grufwub
+# PLATFORM: DESKTOP
+#
+# Set x86 energy performance policy on boot + after suspend
+# using bin/set-performance script
+
 [Unit]
 Description=System Performance
 After=multi-user.target suspend.target

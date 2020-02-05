@@ -1,3 +1,11 @@
+# systemd service
+#
+# @grufwub
+# PLATFORM: DESKTOP
+#
+# Start xsecurelock just before sleep for supplied
+# username
+
 [Unit]
 Description=Lock the screeen
 Before=sleep.target

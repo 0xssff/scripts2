@@ -1,0 +1,20 @@
+# systemd service
+#
+# @grufwub
+# PLATFORM: DESKTOP
+#
+# Undervolt Intel CPU on boot + after suspend using undervolt
+# python utility
+
+[Unit]
+Description=Undervolt
+After=multi-user.target suspend.target
+
+[Service]
+User=root
+Type=oneshot
+ExecStart=/usr/bin/python -m undervolt --core -110 --uncore -110 --cache -110 --analogio -110 --gpu -75 --temp 85 --temp-bat 85
+TimeoutSec=0
+
+[Install]
+WantedBy=multi-user.target suspend.target

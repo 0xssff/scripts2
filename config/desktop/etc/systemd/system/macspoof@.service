@@ -1,3 +1,10 @@
+# systemd service
+#
+# @grufwub
+# PLATFORM: DESKTOP
+#
+# Randomize supplied interface mac on boot using macchanger
+
 [Unit]
 Description=macchanger on %I
 Wants=network-pre.target
