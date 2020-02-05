@@ -1,4 +1,4 @@
-set autoindent
+# set autoindent
 set boldtext
 # set casesensitive
 set constantshow
