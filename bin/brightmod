@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # @grufwub
 # PLATFORM: DESKTOP
@@ -8,54 +8,104 @@
 
 BRIGHTDIR='/sys/class/backlight/intel_backlight'
 BRIGHTFILE="$BRIGHTDIR/brightness"
-MAX_BRIGHT=$(cat "$BRIGHTDIR/max_brightness")
+MAXBRIGHT=0
 
-function write_brightness()
-{
-	sudo sh -c "echo '$1' > '$BRIGHTFILE'"
+usage() {
+    echo 'Usage: brightmod <show|up|down|set> <val>'
 }
 
-function inc_brightness()
-{
-	local cur new
-
-	cur=$(cat "$BRIGHTFILE")
-	let new=$cur+$1
-	if [[ $new -lt $MAX_BRIGHT ]] ; then
-		write_brightness "$new"
-	else
-		write_brightness "$MAX_BRIGHT"
-	fi
+checked_read() {
+    local val=$(cat "$1") > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "Unable to read from: $1"
+        return 1
+    else
+        echo "$val"
+        return 0
+    fi
 }
 
-function dec_brightness()
-{
-	local cur new
-
-	cur=$(cat "$BRIGHTFILE")
-	let new=$cur-$1
-	if [[ $new -gt 0 ]] ; then
-		write_brightness "$new"
-	else
-		write_brightness "0"
-	fi
+checked_write() {
+    if ! (echo "$2" > "$1") > /dev/null 2>&1; then
+        echo "Unable to write to: $1"
+        return 1
+    else
+        return 0
+    fi
 }
 
-case "$1" in
-	'set')
-		write_brightness "$2"
-		exit 0
-		;;
-	'show')
-		printf '%s / %s\n' "$(cat $BRIGHTFILE)" "$MAX_BRIGHT"
-		exit 0
-		;;
-	'up')
-		inc_brightness 25
-		exit 0
-		;;
-	'down')
-		dec_brightness 25
-		exit 0
-		;;
-esac
+inc_brightness() {
+    local cur new
+
+    cur=$(checked_read "$BRIGHTFILE")
+    [ $? -ne 0 ] && return 1
+
+    let new=$cur+$1
+    if [ $new -gt $MAXBRIGHT ]; then
+        new=$MAXBRIGHT
+    fi
+
+    checked_write "$BRIGHTFILE" "$new"
+    return $?
+}
+
+dec_brightness() {
+    local cur new
+
+    cur=$(cat "$BRIGHTFILE")
+    let new=$cur-$1
+    if [ $new -lt 0 ]; then
+        new=0
+    fi
+
+    checked_write "$BRIGHTFILE" "$new"
+    return $?
+}
+
+show_brightness() {
+    local cur=$(checked_read "$BRIGHTFILE")
+    [ $? -ne 0 ] && return $?
+    echo "$cur / $MAXBRIGHT"
+    return 0
+}
+
+main() {
+    MAXBRIGHT=$(checked_read "$BRIGHTDIR/max_brightness")
+    [ $? -ne 0 ] && exit 1
+
+    case "$1" in
+        'set')
+            if [ -z "$2" ]; then
+                usage
+                exit 1
+            elif [ $2 -gt $MAXBRIGHT ]; then
+                echo "$2 is higher than max. brightness ($MAXBRIGHT)"
+                exit 1
+            else
+                checked_write "$BRIGHTFILE" "$2"
+                exit $?
+            fi
+            ;;
+
+        'show')
+            show_brightness
+            exit $?
+            ;;
+
+        'up')
+            inc_brightness 50
+            exit $?
+            ;;
+
+        'down')
+            dec_brightness 50
+            exit $?
+            ;;
+
+        *)
+            usage
+            exit 0
+    esac
+}
+
+main "$@"
