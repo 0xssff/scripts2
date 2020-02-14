@@ -2,6 +2,10 @@
 #
 # @grufwub
 # PLATFORM: DESKTOP
+#
+# Sets up zram based swap devices with either supplied count, size
+# and compression algorithm, or by default uses CPU core count, 512M
+# and lz4.
 
 if [ $(id -u) -ne 0 ]; then
     echo 'Please run this tool as root!'
