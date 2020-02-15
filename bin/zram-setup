@@ -36,7 +36,7 @@ setup_devices() {
     let count=$1-1
     for i in $(seq 0 "$count"); do
         echo "Setting up zram swap device /dev/zram$i (size: $2, algo: $3)..."
-	if [ -b "/dev/zram$i" ]; then
+    if [ -b "/dev/zram$i" ]; then
             echo "!! Device /dev/zram$i already exists!"
         elif ! (setup_zram_device "/dev/zram$i" "$2" "$3"); then
             echo '!! Failed'
@@ -76,9 +76,19 @@ remove_devices() {
     return $result
 }
 
+mod_check() {
+    if !(modinfo 'zram' > /dev/null 2>&1) && !(modprobe 'zram' > /dev/null 2>&1); then
+        echo 'Unable to load zram module!'
+        return 1
+    else
+        return 0
+    fi
+}
+
 main() {
     case "$1" in
         'start')
+            mod_check || exit 1
             local count="$2" size="$3" algo="$4"
             [ -z "$count" ] && count=$(nproc)
             [ -z "$size"  ] && size='512M'
@@ -88,6 +98,7 @@ main() {
             ;;
 
         'stop')
+            mod_check || exit 1
             remove_devices
             exit $?
             ;;
