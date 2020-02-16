@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# @grufwub
+# PLATFORM: DESKTOP
+#
+# Update mirrorlist from Arch Linux generator
+
+if [ $# -ne 1 ]; then
+    echo 'Usage: pacman-update-mirrors [country_code]'
+    exit 1
+fi
+
+if [ $(id -u) -ne 0 ]; then
+    echo 'Script requires root!'
+    exit 1
+fi
+
+base_url='https://archlinux.org/mirrorlist'
+url="$base_url/?country=$1&protocol=https&ip_version=4&ip_version=6&use_mirror_status=on"
+
+mirrors=$(curl -sfL "$url")
+if ! (echo "$mirrors" | grep -q -E '^## Arch Linux repository mirrorlist'); then
+    # Try URL without country code
+    if (curl -sfL "$base_url" > /dev/null 2>&1); then
+        echo 'Invalid country code!'
+    else
+        echo "Cannot connect to: $base_url"
+    fi
+
+    exit 1
+fi
+
+cp '/etc/pacman.d/mirrorlist' '/etc/pacman.d/mirrorlist.old'
+(echo "$mirrors" | sed -e 's|^#Server|Server|g') > '/etc/pacman.d/mirrorlist'
