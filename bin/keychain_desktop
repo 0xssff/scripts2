@@ -1,10 +1,10 @@
-#!/usr/bin/env sh
+#!/bin/sh
 #
 # @grufwub
 # PLATFORM: DESKTOP
 #
 # Script replacement for Funtoo's keychain on systems that
-# don't have immediate access to ps.
+# don't have immediate access to ps. Or because you want to?
 
 AGENT_FILE="$HOME/.keychain_agent"
 
