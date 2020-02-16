@@ -5,10 +5,7 @@
 #
 # Displays simple motd
 
-# Fetch stats
-int_ip=$(hostname -i)
-ext_ip=$(curl --silent icanhazip.com)
-
+# Fetch data
 true | openssl s_client -connect notbird.site:443 > /dev/null 2>&1
 notbird_up=$?
 
@@ -42,8 +39,6 @@ printf '
 \e[39m'
 
 # Display stats
-[ ! -z "$ext_ip" ] && printf '\e[1mInternal:\e[0m %s\n\e[1mExternal:\e[0m %s\n\n' "$int_ip" "$ext_ip"
-
 printf '\e[1mDisk usage:\e[0m\n%s\n\n' "$disk_usage"
 
 printf '\e[1mnotbird.site - '

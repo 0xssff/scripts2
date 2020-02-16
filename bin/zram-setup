@@ -1,0 +1,113 @@
+#!/bin/sh
+#
+# @grufwub
+# PLATFORM: DESKTOP
+#
+# Sets up zram based swap devices with either supplied count, size
+# and compression algorithm, or by default uses CPU core count, 512M
+# and lz4.
+
+if [ $(id -u) -ne 0 ]; then
+    echo 'Please run this tool as root!'
+    exit 1
+fi
+
+usage() {
+    echo 'Usage: zram-setup <start|stop> [count] [size] [algorithm]'
+}
+
+setup_zram_device() {
+    echo '-> Creating zram device'
+    zramctl --find --size "$2" --algorithm "$3" > /dev/null 2>&1 || return 1
+    sleep 2
+
+    echo '-> Setting up device for swap'
+    mkswap "$1" > /dev/null 2>&1 || return 1
+    sleep 2
+
+    echo '-> Enabling swap device'
+    swapon "$1" > /dev/null 2>&1 || return 1
+    sleep 2
+}
+
+setup_devices() {
+    local result=0 count
+
+    let count=$1-1
+    for i in $(seq 0 "$count"); do
+        echo "Setting up zram swap device /dev/zram$i (size: $2, algo: $3)..."
+    if [ -b "/dev/zram$i" ]; then
+            echo "!! Device /dev/zram$i already exists!"
+        elif ! (setup_zram_device "/dev/zram$i" "$2" "$3"); then
+            echo '!! Failed'
+            result=1
+        else
+            echo ''
+        fi
+    done
+
+    return $result
+}
+
+remove_zram_device() {
+    echo '-> Disabling swap'
+    swapoff "$1"
+    sleep 1
+
+    echo '-> Removing block device'
+    zramctl --reset "$1"
+    sleep 1
+}
+
+remove_devices() {
+    local result=0
+
+    for i in /dev/zram*; do
+        [ "$i" = '/dev/zram*' ] && break # no zram devices
+        echo "Stopping zram device: $i..."
+        if ! (remove_zram_device "$i"); then
+            echo '!! Failed'
+            result=1
+        else
+            echo ''
+        fi
+    done
+
+    return $result
+}
+
+mod_check() {
+    if !(modinfo 'zram' > /dev/null 2>&1) && !(modprobe 'zram' > /dev/null 2>&1); then
+        echo 'Unable to load zram module!'
+        return 1
+    else
+        return 0
+    fi
+}
+
+main() {
+    case "$1" in
+        'start')
+            mod_check || exit 1
+            local count="$2" size="$3" algo="$4"
+            [ -z "$count" ] && count=$(nproc)
+            [ -z "$size"  ] && size='512M'
+            [ -z "$algo"  ] && algo='lz4'
+            setup_devices "$count" "$size" "$algo"
+            exit $?
+            ;;
+
+        'stop')
+            mod_check || exit 1
+            remove_devices
+            exit $?
+            ;;
+
+        *)
+            usage
+            exit 0
+            ;;
+    esac
+}
+
+main "$@"
