@@ -1,0 +1,32 @@
+#!/bin/sh
+# Lock screen if valid user found to be logged into DE
+
+set -e
+
+lock() {
+    local _xsecurelock line user log ret=1
+
+    _xsecurelock='XSS_SLEEP_LOCK_FD=1 XSECURELOCK_DISCARD_FIRST_KEYPRESS=0 XSECURELOCK_FONT="Ubuntu" /usr/bin/xsecurelock'
+
+    # List of valid desktops, add your own here
+    line=$(w -hs | grep -E ".*(xfce4-session|dwm)$" | head -n 1)
+
+    if [ ! -z "$line" ]; then
+        user=$(echo "$line" | sed -E 's|\s+.*$||')
+        log="/var/log/xsecurelock.$user"
+
+        if [ $(echo "$line" | sed -E --expression="s|^$user\s+tty||" --expression="s|\s+.*$||") -eq $(fgconsole) ]; then
+            [ -f "$log" ] && printf '\n' >> "$log"
+            printf '%s\n' "$(date +'%F %T')" >> "$log"
+            chmod 600 "$log"
+
+            (su $user -c "sh -c '$_xsecurelock || kill -9 -1'" &) >> "$log" 2>&1
+            ret=0
+        fi
+    fi
+
+    return $ret
+}
+
+[ $(id -u) -ne 0 ] && exit 1
+lock

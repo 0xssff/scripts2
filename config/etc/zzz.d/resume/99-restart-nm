@@ -1,0 +1,4 @@
+#!/bin/sh
+# Restart NetworkManager on resume if already running
+
+sv status NetworkManager && sv restart NetworkManager
