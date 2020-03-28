@@ -81,12 +81,6 @@ eval "$(dbus-launch --exit-with-session --sh-syntax)"
 
 export _JAVA_AWT_WM_NONREPARENTING=1
 
-# Set touchpad preferences
-#INPUT_DEVICE='DELL081B:00 044E:120A Touchpad'
-#xinput set-prop "$INPUT_DEVICE" 'libinput Tapping Enabled' 1
-#xinput set-prop "$INPUT_DEVICE" 'libinput Natural Scrolling Enabled' 1
-#xinput set-prop "$INPUT_DEVICE" 'libinput Disable While Typing Enabled' 0
-
 # Set xrdb prefs
 xrdb -l "$HOME/.Xresources"
 
