@@ -4,8 +4,7 @@ GRUB_DEFAULT=0
 GRUB_TIMEOUT=5
 GRUB_DISTRIBUTOR="Arch"
 GRUB_CMDLINE_LINUX_DEFAULT=""
-GRUB_CMDLINE_LINUX="cryptdevice=UUID=______:cryptroot intel_idle.max_cstate=1 cryptomgr.notests kvm-intel.nested=1 no_timer_check noreplace-smp intel_iommu=igfx_off page_alloc.shuffle=1 rootfstype=btrfs tsc=reliable modules.sig_enforce=1 apparmor=1 security=apparmor"
-# rcu_nocbs=0-64 rcupdate.rcu_expedited acpi.debug_level=0x2 drm.debug=0xe
+GRUB_CMDLINE_LINUX="cryptdevice=UUID=______:cryptroot intel_idle.max_cstate=1 nosmt cryptomgr.notests kvm-intel.nested=1 kvm-intel.ept=0 no_timer_check noreplace-smp intel_iommu=igfx_off page_alloc.shuffle=1 rcu_nocbs=0-64 rcupdate.rcu_expedited=1 rootfstype=btrfs tsc=reliable tsx_async_abort=full tsx=off modules.sig_enforce=1 apparmor=1 security=apparmor"
 
 # Preload both GPT and MBR modules so that they are not missed
 GRUB_PRELOAD_MODULES="part_gpt part_msdos btrfs"
