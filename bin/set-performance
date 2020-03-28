@@ -1,17 +1,15 @@
-#!/bin/bash
+#!/bin/sh
 #
 # @grufwub
 # PLATFORM: DESKTOP
 
-function check_module()
-{
+check_module() {
     if ! (lsmod | grep -q -e '^msr') ; then
         sudo modprobe msr
     fi
 }
 
-function set_perf()
-{
+set_perf() {
     sudo x86_energy_perf_policy --cpu $1 $2
 }
 
