@@ -1,0 +1,5 @@
+#!/bin/sh
+
+DIR="$HOME/.joplin"
+(cd "$DIR" && ./Joplin.AppImage &) > "$DIR/joplin.log" 2>&1
+unset DIR
