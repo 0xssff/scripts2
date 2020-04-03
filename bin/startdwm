@@ -38,12 +38,6 @@ if test "x$XDG_CACHE_HOME" = "x" ; then
 fi
 [ -d "$XDG_CACHE_HOME" ] || mkdir "$XDG_CACHE_HOME"
 
-# set up XDG user directores.  see
-# http://freedesktop.org/wiki/Software/xdg-user-dirs
-if command -v xdg-user-dirs-update >/dev/null 2>&1; then
-    xdg-user-dirs-update
-fi
-
 # For now, start with an empty list
 XRESOURCES=""
 
@@ -77,12 +71,18 @@ if [ -d /etc/X11/xinit/xinitrc.d ]; then
   unset f
 fi
 
-eval "$(dbus-launch --exit-with-session --sh-syntax)"
-
+# Fix Java apps under dwm
 export _JAVA_AWT_WM_NONREPARENTING=1
 
-# Set xrdb prefs
-xrdb -l "$HOME/.Xresources"
+# Set touchpad preferences
+INPUT_DEVICE='____'
+xinput set-prop "$INPUT_DEVICE" 'libinput Tapping Enabled' 1
+xinput set-prop "$INPUT_DEVICE" 'libinput Natural Scrolling Enabled' 1
+xinput set-prop "$INPUT_DEVICE" 'libinput Disable While Typing Enabled' 0
+unset INPUT_DEVICE
+
+# Load dbus into environment
+eval "$(dbus-launch --sh-syntax --exit-with-session)"
 
 # Launch pulseaudio daemon
 start-pulseaudio-x11
@@ -96,6 +96,3 @@ xfsettingsd
 # Start slstatus and dwm
 slstatus &
 exec dwm
-
-# Should not have reached here!
-exit 1
