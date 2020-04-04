@@ -11,6 +11,8 @@ fi
 # Variables
 EDITOR=nano
 HISTSIZE=10000
+
+# THIS ASSUMES /tmp MOUNTED AS tmpfs
 HISTFILE="/tmp/.bash_history.$USER"
 
 # Ensure history file safe
