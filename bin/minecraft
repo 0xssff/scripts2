@@ -2,4 +2,3 @@
 
 DIR="$HOME/Apps/minecraft-launcher"
 (cd "$DIR" && ./minecraft-launcher &) > "$DIR/minecraft-launcher.log" 2>&1
-unset DIR

@@ -1,0 +1,26 @@
+#!/bin/sh
+
+gen_random() {
+    /bin/cat /dev/urandom | tr -cd 'a-zA-Z0-9' | fold -w "$1" | head -n 1
+}
+
+main() {
+    local random
+
+    # Check is number
+    val=$(($1 + 0))
+    if [ $val -eq 0 ]; then
+        printf 'Please provide valid number!\n'
+        exit 1
+    fi
+
+    random=$(gen_random "$val")
+    printf '%s\n' "$random"
+
+    exit 0
+}
+
+# Ensure correct number of arguments
+[ $# -eq 1 ] || exit 1
+
+main "$1"

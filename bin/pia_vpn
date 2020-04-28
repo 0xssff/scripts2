@@ -1,0 +1,144 @@
+#!/bin/sh
+
+ROOTDIR="$HOME/.pia"
+USER=''
+PASS=''
+OVPNS="$ROOTDIR/configs"
+CREDFILE="$ROOTDIR/credenetials"
+PIDFILE="$ROOTDIR/openvpn.pid"
+STATUSFILE="$ROOTDIR/openvpn.status"
+
+usage() {
+    echo 'Usage: pia_vpn connect|disconnect|status <connection type> <server>'
+}
+
+connect() {
+    local ovpnfile tmpfile pid pidfile result
+
+    if [ $# -gt 2 ]; then
+        usage
+        return 1
+    fi
+
+    if [ ! -d "$OVPNS/$1" ]; then
+        echo "Connection type '$1' does not exist!"
+        echo 'Select from:'
+        echo "$(ls "$OVPNS")"
+        return 1
+    fi
+
+    ovpnfile="$OVPNS/$1/$2.ovpn"
+    if [ ! -f "$ovpnfile" ]; then
+        echo "Server '$2' does not exist!"
+        echo 'Select from:'
+        echo "$(ls "$OVPNS/$1" | grep -v -E '(ca.rsa.4096.crt|crl.rsa.4096.pem)' | sed -e 's|\.ovpn$||g')"
+        return 1
+    fi
+
+    tmpfile="$ROOTDIR/.tmp"
+    rm -f "$tmpfile"
+    if ! (touch "$tmpfile" && chmod 600 "$tmpfile"); then
+        echo 'Unable to create and set tmpfile permissions!'
+        return 1
+    fi
+
+    echo "$USER" > "$tmpfile"
+    echo "$PASS" >> "$tmpfile"
+    sed -i "$ovpnfile" -e "s|^auth-user-pass.*|auth-user-pass "$tmpfile"|"
+
+    pidfile="$ROOTDIR/openvpn.pid"
+
+    cd "$OVPNS/$1" > /dev/null 2>&1
+    sudo openvpn --config "$2.ovpn" --auth-nocache --daemon --writepid "$PIDFILE" --status "$STATUSFILE"
+
+    if [ $? -eq 0 ]; then
+        echo 'Successfully connected!'
+        result=0
+    else
+        echo 'Unable to connect!'
+        rm -f "$pidfile"
+        result=1
+    fi
+
+    cd - > /dev/null 2>&1
+    rm -f "$tmpfile"
+    return $result
+}
+
+disconnect() {
+    if [ ! -f "$PIDFILE" ]; then
+        if (ps -ax | grep -v 'grep' | grep -q 'openvpn'); then
+            echo 'Openvpn is running, but no PID file exists. Was this started without pia_vpn?'
+        else
+            echo 'Openvpn is not running!'
+        fi
+
+        return 1
+    fi
+
+    if (sudo kill "$(cat "$PIDFILE")" > /dev/null 2>&1); then
+        echo 'Successfully stopped openvpn'
+        rm -f "$PIDFILE"
+        return 0
+    else
+        if ! (sudo kill -0 "$(cat "$PIDFILE")" > /dev/null 2>&1); then
+            echo 'Openvpn not running!'
+            return 1
+        else
+            echo 'Unable to stop openvpn process'
+            return 1
+        fi
+    fi
+}
+
+status() {
+    if [ -f "$PIDFILE" ] && (sudo kill -0 "$(cat "$PIDFILE")" > /dev/null 2>&1); then
+        echo 'Openvpn is running!'
+        sudo cat "$STATUSFILE" | grep -v -E '(END|STATISTICS)'
+        return 0
+    else
+        if (ps -ax | grep -v 'grep' | grep -q 'openvpn'); then
+            echo 'Openvpn is running but not at expected PID. Was this started without pia_vpn?'
+            return 1
+        else
+            echo 'Openvpn is not running'
+            return 1
+        fi
+    fi
+}
+
+main() {
+    if [ $(id -u) -eq 0 ]; then
+        echo 'Please do not run this script as root! Root permissions will be requested when necessary'
+        return 1
+    fi
+
+    [ ! -d "$ROOTDIR" ] && mkdir -p "$ROOTDIR"
+    [ ! -d "$OVPNS"   ] && mkdir "$OVPNS"
+
+    case "$1" in
+        'connect')
+            shift 1
+            connect "$@"
+            return $?
+            ;;
+
+        'disconnect')
+            disconnect
+            return $?
+            ;;
+
+        'status')
+            status
+            return $?
+            ;;
+
+        *)
+            usage
+            return 0
+            ;;
+    esac
+}
+
+main "$@"
+exit $?
