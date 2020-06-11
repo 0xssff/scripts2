@@ -1,0 +1,15 @@
+# Set style
+--style=plain
+
+# Specify desired highlighting theme (e.g. "TwoDark"). Run `bat --list-themes`
+--theme="Monokai Extended Bright"
+
+# Uncomment the following line to disable automatic paging:
+--paging=never
+
+# Syntax mappings: map a certain filename pattern to a language.
+--map-syntax "*.ino:C++"
+--map-syntax "*.mkshrc:Bourne Again Shell (bash)"
+--map-syntax "*.kshrc:Bourne Again Shell (bash)"
+--map-syntax "*.shellrc:Bourne Again Shell (bash)"
+--map-syntax "*bashrc:Bourne Again Shell (bash)"

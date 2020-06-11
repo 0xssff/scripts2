@@ -4,14 +4,14 @@ set boldtext
 set constantshow
 # set cutfromcursor
 set emptyline
-set jumpyscrolling
+# set jumpyscrolling
 set multibuffer
 set noconvert
 set nohelp
 set nonewlines
 set regexp
 set smarthome
-set softwrap
+set nowrap
 set tabsize 4
 set tabstospaces
 set whitespace "»·"

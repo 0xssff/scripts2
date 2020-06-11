@@ -1,0 +1,58 @@
+#
+# ~/.shellrc
+#
+
+# If running on /dev/tty1, startx (executes ~/.xinitrc)
+if [ "$(tty)" = '/dev/tty1' ]; then
+    startx
+    exit $?
+fi
+
+# Check _SHELL is set
+if [ -z "$_SHELL" ]; then
+    echo "Please set the \$_SHELL environment variables before calling this script!"
+    return 1
+fi
+
+# Variables
+EDITOR=jstar
+HISTSIZE=10000
+
+# THIS ASSUMES /tmp MOUNTED AS tmpfs
+HISTFILE="/tmp/.${_SHELL}_history.$USER"
+unset _SHELL
+
+# Ensure history file safe
+touch "$HISTFILE"
+chmod 600 "$HISTFILE"
+
+# Shell PS1
+PS1=$'\033[01;32m$USER\033[00m @ \033[01;34m$(if echo "$PWD" | grep -q -E "^$HOME"; then echo "$PWD" | sed -e "s|^$HOME|~|g"; else echo "$PWD"; fi)\033[00m
+--> '
+
+# User bin path
+[ -d "$HOME/bin" ]        && PATH="$HOME/bin:$PATH"
+
+# Odin
+[ -d "$HOME/.odin" ]      && PATH="$HOME/.odin:$PATH"
+
+# Rustup
+[ -d "$HOME/.cargo/bin" ] && PATH="$HOME/.cargo/bin:$PATH"
+
+# .local/bin
+[ -d "$HOME/.local/bin" ] && PATH="$HOME/.local/bin:$PATH"
+
+# Alias
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias clear='clear -x'
+
+# Export variables
+export HISTSIZE HISTFILE EDITOR PS1 PATH
+
+# Load Keychain
+eval `keychain ~/.ssh/id_ecdsa`
+eval `keychain ~/.ssh/id_rsa`
+
+# Motd
+[ -x ~/.motd ] && . ~/.motd
