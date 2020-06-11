@@ -82,13 +82,13 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_base00, "-nf", col_base0D, "-sb", col_base00, "-sf", col_base0D, NULL };
-static const char *termcmd[]  = { "urxvt-launch", NULL };
+static const char *termcmd[]  = { "alacritty", NULL };
 
 static const char *brightness_up[]  =   { "xbacklight", "-inc", BCKLGHT_DIFF };
 static const char *brightness_down[]  = { "xbacklight", "-dec", BCKLGHT_DIFF };
-static const char *volume_up[] = { "amixer", "-D", "pulse", "sset", "Master", VOLUP_DIFF, NULL };
-static const char *volume_down[] = { "amixer", "-D", "pulse", "sset", "Master", VOLDOWN_DIFF, NULL };
-static const char *volume_mute[] = { "amixer", "-D", "pulse", "sset", "Master", "1+", "toggle", NULL };
+static const char *volume_up[] = { "amixer", "sset", "Master", VOLUP_DIFF, NULL };
+static const char *volume_down[] = { "amixer", "sset", "Master", VOLDOWN_DIFF, NULL };
+static const char *volume_mute[] = { "amixer", "sset", "Master", "1+", "toggle", NULL };
 static const char *mic_mute[] = { "amixer", "-D", "pulse", "sset", "Capture", "1+", "toggle", NULL };
 static const char *screenshot[] = { "scrot", " screenshot_%y%m%d_%H%M.png", NULL };
 static const char *screenshot_focused[] = { "scrot", "--focused", " screenshot_%y%m%d_%H%M.png", NULL };
