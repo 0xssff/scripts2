@@ -2,7 +2,7 @@
 
 GIT_URL='https://git.suckless.org/slstatus'
 GIT_DIR='slstatus'
-CONFIG_URL='https://raw.githubusercontent.com/grufwub/scripts/master/config/slstatus_config.h'
+CONFIG_FILE=''
 C_FLAGS='-pipe -march=native -mtune=native'
 
 silent() {
@@ -38,7 +38,9 @@ compile() {
   sed -i 'config.mk' -e "s|CFLAGS\s*= |CFLAGS = $C_FLAGS |"
 
   # Add our configuration file!
-  curl -fL "$CONFIG_URL" -o 'config.h'
+  if [ ! -z "$CONFIG_FILE" ]; then
+    cp "$CONFIG_FILE" 'config.h' || return 1
+  fi
 
   # Build!
   make || return 1
@@ -77,5 +79,30 @@ main() {
   return 0
 }
 
-main
-exit $?
+case $# in
+  0)
+    main
+    exit $?
+    ;;
+
+  2)
+    if [ "$1" = '--config' ]; then
+      case "$2" in
+        /*)
+          CONFIG_FILE="$2"
+          ;;
+        *)
+          CONFIG_FILE="${PWD}/${2}"
+          ;;
+      esac
+      main
+      exit $?
+    else
+      exit 1
+    fi
+    ;;
+
+  *)
+    exit 1
+    ;;
+esac
