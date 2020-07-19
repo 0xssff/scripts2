@@ -90,8 +90,8 @@ static const char *volume_up[] = { "amixer", "sset", "Master", VOLUP_DIFF, NULL 
 static const char *volume_down[] = { "amixer", "sset", "Master", VOLDOWN_DIFF, NULL };
 static const char *volume_mute[] = { "amixer", "sset", "Master", "1+", "toggle", NULL };
 static const char *mic_mute[] = { "amixer", "-D", "pulse", "sset", "Capture", "1+", "toggle", NULL };
-static const char *screenshot[] = { "scrot", " screenshot_%y%m%d_%H%M.png", NULL };
-static const char *screenshot_focused[] = { "scrot", "--focused", " screenshot_%y%m%d_%H%M.png", NULL };
+static const char *screenshot[] = { "scrot", "screenshot_%y%m%d_%H%M.png", NULL };
+static const char *screenshot_focused[] = { "scrot", "--focused", "screenshot_%y%m%d_%H%M.png", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */

@@ -63,7 +63,7 @@ static const struct arg args[] = {
 	/* function format          argument */
 	{ cpu_perc, " CPU: %s%%" },
 	{ cpu_freq, " %sHz " },
-	{ temp, " %s°C |", "/sys/class/hwmon/hwmon0/temp1_input" },
+	{ temp, " %s°C |", "/sys/class/hwmon/hwmon1/temp1_input" },
 	{ ram_used, " RAM: %s |" },
 	{ run_command, " Volume: %4s | ", "amixer sget Master | awk -F\"[][]\" '/%/ { print $2 }' | head -n1" },
 	{ battery_perc, "Battery: %3s%% ", "BAT0" },
