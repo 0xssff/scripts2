@@ -1,11 +1,22 @@
 #!/bin/sh
 
+rand_source='/dev/urandom'
+
+gen_random_special() {
+    /bin/cat $rand_source | tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' | fold -w "$1" | head -n 1
+}
+
 gen_random() {
-    /bin/cat /dev/urandom | tr -cd 'a-zA-Z0-9' | fold -w "$1" | head -n 1
+    /bin/cat $rand_source | tr -cd 'a-zA-Z0-9' | fold -w "$1" | head -n 1
 }
 
 main() {
-    local random
+    local random use_special
+
+    if [ "$1" = '--special' ]; then
+        use_special='yes'
+        shift 1
+    fi
 
     # Check is number
     val=$(($1 + 0))
@@ -14,13 +25,17 @@ main() {
         exit 1
     fi
 
-    random=$(gen_random "$val")
+    if [ "$use_special" ]; then
+        random="$(gen_random_special "$val")"
+    else
+        random="$(gen_random "$val")"
+    fi
+
     printf '%s\n' "$random"
 
     exit 0
 }
 
-# Ensure correct number of arguments
-[ $# -eq 1 ] || exit 1
+[ $# -gt 2 ] && exit 1
 
-main "$1"
+main "$@"
