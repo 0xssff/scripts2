@@ -9,14 +9,5 @@ check_module() {
     fi
 }
 
-set_perf() {
-    sudo x86_energy_perf_policy --cpu $1 $2
-}
-
 check_module
-
-for cpu in $(ls /dev/cpu); do
-    if [ -c "/dev/cpu/$cpu/msr" ]; then
-        set_perf $cpu performance
-    fi
-done
+sudo x86_energy_perf_policy --turbo-enable 0 'performance'
