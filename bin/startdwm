@@ -94,10 +94,12 @@ start-pulseaudio-x11
 xfsettingsd
 
 # Start redshift
-LATITUDE='____'
-LONGITUDE='____'
-redshift -l "${LATITUDE}:${LONGITUDE}"
-unset LATITUDE LONGITUDE
+if (! pidof 'redshift'); then
+    LATITUDE='____'
+    LONGITUDE='____'
+    redshift -l "${LATITUDE}:${LONGITUDE}"
+    unset LATITUDE LONGITUDE
+fi
 
 # Start slstatus and dwm
 slstatus &
