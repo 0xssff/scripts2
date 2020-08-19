@@ -93,6 +93,14 @@ start-pulseaudio-x11
 # Load xfce4 settings
 xfsettingsd
 
+# Start redshift
+if (! pidof 'redshift'); then
+    LATITUDE='____'
+    LONGITUDE='____'
+    redshift -l "${LATITUDE}:${LONGITUDE}"
+    unset LATITUDE LONGITUDE
+fi
+
 # Start slstatus and dwm
 slstatus &
 exec dwm
