@@ -1,3 +1,0 @@
-#!/bin/sh
-
-/usr/bin/python3 -m undervolt --core -50 --cache -50 --uncore -50 --analogio -50 --gpu -50 --temp-ac 85 --temp-bat 85

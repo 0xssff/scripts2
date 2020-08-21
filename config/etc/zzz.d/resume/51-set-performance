@@ -1,4 +1,0 @@
-#!/bin/sh
-# Ensure x86 CPU energy performance profile still set
-
-/usr/local/bin/set-performance
